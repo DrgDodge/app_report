@@ -1,7 +1,7 @@
 <script lang="ts">
     import { dev } from '$app/environment';
 
-    const API_BASE_URL = dev ? 'http://127.0.0.1:5001' : '/api';
+    const API_BASE_URL = '/api';
 
     let initDbMessage = $state('');
     let initDbStatus = $state('idle');
