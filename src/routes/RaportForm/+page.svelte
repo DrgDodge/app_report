@@ -413,10 +413,10 @@
 							type="text"
 							id="client"
 							bind:value={raport.client}
-							                                            on:input={handleClientInput}
-							                                            on:blur={() => setTimeout(() => (showClientSugestii = false), 200)}
-							                                            on:focus={() => { showClientSugestii = true; handleClientInput({ target: { value: raport.client } } as unknown as Event); }}
-							                                            autocomplete="off"							class={inputClass}
+							                                                                                        on:input={handleClientInput}
+							                                                                                        on:blur={() => setTimeout(() => (showClientSugestii = false), 200)}
+							                                                                                        on:focus={() => { showClientSugestii = true; handleClientInput({ target: { value: raport.client } } as unknown as Event); }}
+							                                                                                        autocomplete="off"
 						/>
 						{#if showClientSugestii && clientSugestii.length > 0}
 							<ul
@@ -461,11 +461,10 @@
 						type="text"
 						id="utilaj"
 						bind:value={raport.utilaj}
-						                                            on:input={handleUtilajInput}
-						                                            on:blur={() => setTimeout(() => (showUtilajSugestii = false), 200)}
-						                                            on:focus={() => { showUtilajSugestii = true; handleUtilajInput({ target: { value: raport.utilaj } } as unknown as Event); }}
-						                                            autocomplete="off"						class={inputClass}
-					/>
+						                                                                                        on:input={handleUtilajInput}
+						                                                                                        on:blur={() => setTimeout(() => (showUtilajSugestii = false), 200)}
+						                                                                                        on:focus={() => { showUtilajSugestii = true; handleUtilajInput({ target: { value: raport.utilaj } } as unknown as Event); }}
+						                                                                                        autocomplete="off"					/>
 					{#if showUtilajSugestii && utilajSugestii.length > 0}
 						<ul
 							class="absolute top-full left-0 right-0 bg-white border border-gray-300 border-t-0 rounded-b-md shadow-lg z-10 max-h-52 overflow-y-auto"
@@ -490,11 +489,10 @@
 						type="text"
 						id="serie"
 						bind:value={raport.serie}
-						                                            on:input={handleSerieInput}
-						                                            on:blur={() => setTimeout(() => (showSerieSugestii = false), 200)}
-						                                            on:focus={() => { showSerieSugestii = true; handleSerieInput({ target: { value: raport.serie } } as unknown as Event); }}
-						                                            autocomplete="off"						class={inputClass}
-					/>
+						                                                                                        on:input={handleSerieInput}
+						                                                                                        on:blur={() => setTimeout(() => (showSerieSugestii = false), 200)}
+						                                                                                        on:focus={() => { showSerieSugestii = true; handleSerieInput({ target: { value: raport.serie } } as unknown as Event); }}
+						                                                                                        autocomplete="off"					/>
 					{#if showSerieSugestii && serieSugestii.length > 0}
 						<ul
 							class="absolute top-full left-0 right-0 bg-white border border-gray-300 border-t-0 rounded-b-md shadow-lg z-10 max-h-52 overflow-y-auto"
@@ -557,10 +555,9 @@
 										<input
 											type="text"
 											bind:value={piesa.pn}
-											                                                                                                                            on:input={(e) => handlePieseInput(e, i, 'inlocuite')}
-											                                                                                                                            on:blur={() => setTimeout(() => (showPieseSugestii = false), 200)}
-											                                                                                                                            on:focus={(e) => { showPieseSugestii = true; handlePieseInput(e, i, 'inlocuite'); }}
-											                                                                                                                            class={inputClassTable}										/>
+											                                                                                                                                                                                                            on:input={(e) => handlePieseInput(e, i, 'inlocuite')}
+											                                                                                                                                                                                                            on:blur={() => setTimeout(() => (showPieseSugestii = false), 200)}
+											                                                                                                                                                                                                            on:focus={(e) => { showPieseSugestii = true; handlePieseInput(e, i, 'inlocuite'); }}										/>
 										{#if showPieseSugestii && activePieseIndex === i && activePieseTip === 'inlocuite' && pieseSugestii.length > 0}
 											<ul
 												class="absolute top-full left-0 bg-white border border-gray-300 shadow-lg z-20 max-h-52 overflow-y-auto w-[300px]"
@@ -581,10 +578,9 @@
 																							</td>
 																							<td class="border border-gray-300 p-1 relative">
 																								<input type="text" bind:value={piesa.descriere} class={inputClassTable} 
-														                                                                                                                            on:input={(e) => handleDescriereInput(e, i, 'inlocuite')}
-														                                                                                                                            on:blur={() => setTimeout(() => (showDescriereSugestii = false), 200)}
-														                                                                                                                            on:focus={(e) => { showDescriereSugestii = true; handleDescriereInput(e, i, 'inlocuite'); }}
-														                                                                                                                            class={inputClassTable}														                                        />
+														                                                                                                                                                                                                            on:input={(e) => handleDescriereInput(e, i, 'inlocuite')}
+														                                                                                                                                                                                                            on:blur={() => setTimeout(() => (showDescriereSugestii = false), 200)}
+														                                                                                                                                                                                                            on:focus={(e) => { showDescriereSugestii = true; handleDescriereInput(e, i, 'inlocuite'); }}														                                        />
 														                                        {#if showDescriereSugestii && activeDescriereIndex === i && activeDescriereTip === 'inlocuite' && descriereSugestii.length > 0}
 														                                            <ul
 														                                                class="absolute top-full left-0 bg-white border border-gray-300 shadow-lg z-20 max-h-52 overflow-y-auto w-[300px]"
@@ -641,10 +637,9 @@
 										<input
 											type="text"
 											bind:value={piesa.pn}
-											                                                                                on:input={(e) => handlePieseInput(e, i, 'necesare')}
-											                                                                                on:blur={() => setTimeout(() => (showPieseSugestii = false), 200)}
-											                                                                                on:focus={(e) => { showPieseSugestii = true; handlePieseInput(e, i, 'necesare'); }}
-											                                                                                class={inputClassTable}										/>
+											                                                                                                                                                                on:input={(e) => handlePieseInput(e, i, 'necesare')}
+											                                                                                                                                                                on:blur={() => setTimeout(() => (showPieseSugestii = false), 200)}
+											                                                                                                                                                                on:focus={(e) => { showPieseSugestii = true; handlePieseInput(e, i, 'necesare'); }}										/>
 										                                        {#if showPieseSugestii && activePieseIndex === i && activePieseTip === 'necesare' && pieseSugestii.length > 0}
 										                                            <ul
 										                                                class="absolute top-full left-0 bg-white border border-gray-300 shadow-lg z-20 max-h-52 overflow-y-auto w-[300px]"
@@ -667,7 +662,6 @@
                                                                                 on:input={(e) => handleDescriereInput(e, i, 'necesare')}
                                                                                 on:blur={() => setTimeout(() => (showDescriereSugestii = false), 200)}
                                                                                 on:focus={(e) => { showDescriereSugestii = true; handleDescriereInput(e, i, 'necesare'); }}
-                                                                                class={inputClassTable}
                                         />
                                         {#if showDescriereSugestii && activeDescriereIndex === i && activeDescriereTip === 'necesare' && descriereSugestii.length > 0}
                                             <ul
@@ -741,8 +735,7 @@
 					bind:value={raport.nume_semnatura_client}
                                                             on:input={handleContactInput}
                                                             on:blur={() => setTimeout(() => (showContactSugestii = false), 200)}
-                                                            on:focus={() => { showContactSugestii = true; handleContactInput({ target: { value: raport.nume_semnatura_client } } as unknown as Event); }}
-                                                            class={inputClass}				/>
+                                                            on:focus={() => { showContactSugestii = true; handleContactInput({ target: { value: raport.nume_semnatura_client } } as unknown as Event); }}				/>
                 {#if showContactSugestii && contactSugestii.length > 0}
                     <ul
                         class="absolute bottom-full left-0 right-0 bg-white border border-gray-300 border-t-0 rounded-b-md shadow-lg z-10 max-h-52 overflow-y-auto"
