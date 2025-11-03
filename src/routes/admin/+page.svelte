@@ -1,11 +1,13 @@
 <script lang="ts">
-    const API_BASE_URL = 'http://127.0.0.1:5001/api';
+    import { dev } from '$app/environment';
+
+    const API_BASE_URL = dev ? 'http://127.0.0.1:5001' : '/api';
 
     let initDbMessage = $state('');
-    let initDbStatus: 'idle' | 'success' | 'error' = $state('idle');
+    let initDbStatus = $state('idle');
 
     let backupDbMessage = $state('');
-    let backupDbStatus: 'idle' | 'success' | 'error' = $state('idle');
+    let backupDbStatus = $state('idle');
 
     async function initializeDatabase() {
         initDbMessage = 'Initializing database...';
