@@ -1,5 +1,6 @@
 <script lang="ts">
 	import ClientPopup from './ClientPopup.svelte';
+	import ReportHistory from './ReportHistory.svelte';
 
 	// --- Tipuri de date ---
 	interface Piesa {
@@ -83,24 +84,51 @@
 	let statusMesaj = $state('');
 	let statusTip = $state<'succes' | 'eroare'>('succes');
 
-	let showClientPopup = $state(false);
-
-	// --- Functii pentru liste dinamice ---
-	function addPiesaInlocuita() {
-		pieseInlocuite = [...pieseInlocuite, { pn: '', descriere: '', buc: 1 }];
-	}
-	function removePiesaInlocuita(index: number) {
-		pieseInlocuite.splice(index, 1);
-	}
-	function addPiesaNecesara() {
-		pieseNecesare = [...pieseNecesare, { pn: '', descriere: '', buc: 1 }];
-	}
-	function removePiesaNecesara(index: number) {
-		pieseNecesare.splice(index, 1);
-	}
-
-	// --- Functii Autocomplete ---
-
+	    let showClientPopup = $state(false);
+	    let showReportHistory = $state(false);
+	
+	    let descriereSugestii = $state<string[]>([]);
+	    let showDescriereSugestii = $state(false);
+	    let activeDescriereIndex = $state<number | null>(null);
+	    let activeDescriereTip = $state<'inlocuite' | 'necesare'>('inlocuite');
+	
+	    let contactSugestii = $state<string[]>([]);
+	    let showContactSugestii = $state(false);
+	
+	    // --- Functii pentru liste dinamice ---
+	    function addPiesaInlocuita() {
+	        pieseInlocuite = [...pieseInlocuite, { pn: '', descriere: '', buc: 1 }];
+	    }
+	    function removePiesaInlocuita(index: number) {
+	        pieseInlocuite.splice(index, 1);
+	    }
+	    function addPiesaNecesara() {
+	        pieseNecesare = [...pieseNecesare, { pn: '', descriere: '', buc: 1 }];
+	    }
+	    function removePiesaNecesara(index: number) {
+	        pieseNecesare.splice(index, 1);
+	    }
+	
+	    // --- Functii Autocomplete ---
+	
+	    import { onMount } from 'svelte';
+	
+	    onMount(async () => {
+	        try {
+	            const res = await fetch(`${API_BASE_URL}/raport/last-number`);
+	            if (res.ok) {
+	                const lastNumber = await res.json();
+	                if (lastNumber) {
+	                    const number = parseInt(lastNumber.split('-')[0]);
+	                    if (!isNaN(number)) {
+	                        raport.numar = `${number + 1}-data`;
+	                    }
+	                }
+	            }
+	        } catch (error) {
+	            console.error('Failed to fetch last report number:', error);
+	        }
+	    });
 	let clientDebounceTimer: number;
 	async function handleClientInput(e: Event) {
 		const input = e.target as HTMLInputElement;
@@ -182,12 +210,77 @@
 		}, 300);
 	}
 
-	function selectSerie(sugestie: string) {
-		raport.serie = sugestie;
-		serieSugestii = [];
-		showSerieSugestii = false;
-	}
-
+	    function selectSerie(sugestie: string) {
+	        raport.serie = sugestie;
+	        serieSugestii = [];
+	        showSerieSugestii = false;
+	    }
+	
+	    let descriereDebounceTimer: number;
+	    async function handleDescriereInput(e: Event, index: number, tip: 'inlocuite' | 'necesare') {
+	        const input = e.target as HTMLInputElement;
+	        const query = input.value;
+	
+	        if (tip === 'inlocuite') {
+	            pieseInlocuite[index].descriere = query;
+	        } else {
+	            pieseNecesare[index].descriere = query;
+	        }
+	
+	        activeDescriereIndex = index;
+	        activeDescriereTip = tip;
+	        showDescriereSugestii = true;
+	
+	        clearTimeout(descriereDebounceTimer);
+	        if (query.length < 2) {
+	            descriereSugestii = [];
+	            return;
+	        }
+	        descriereDebounceTimer = setTimeout(async () => {
+	            const res = await fetch(`${API_BASE_URL}/search/piese-descriere?q=${query}`);
+	            descriereSugestii = await res.json();
+	        }, 300);
+	    }
+	
+	    function selectDescriere(sugestie: string) {
+	        if (activeDescriereIndex === null) return;
+	
+	        if (activeDescriereTip === 'inlocuite') {
+	            pieseInlocuite[activeDescriereIndex].descriere = sugestie;
+	        } else {
+	            pieseNecesare[activeDescriereIndex].descriere = sugestie;
+	        }
+	        descriereSugestii = [];
+	        showDescriereSugestii = false;
+	        activeDescriereIndex = null;
+	    }
+	
+	    let contactDebounceTimer: number;
+	    async function handleContactInput(e: Event) {
+	        const input = e.target as HTMLInputElement;
+	        raport.nume_semnatura_client = input.value;
+	        showContactSugestii = true;
+	
+	        clearTimeout(contactDebounceTimer);
+	        if (raport.nume_semnatura_client.length < 1 || !raport.client_id) {
+	            contactSugestii = [];
+	            return;
+	        }
+	
+	        contactDebounceTimer = setTimeout(async () => {
+	            const res = await fetch(`${API_BASE_URL}/client/${raport.client_id}/contact`);
+	            const data = await res.json();
+	            if(data){
+	                contactSugestii = [data];
+	            }
+	        }, 300);
+	    }
+	
+	    function selectContact(sugestie: string) {
+	        raport.nume_semnatura_client = sugestie;
+	        contactSugestii = [];
+	        showContactSugestii = false;
+	    }
 	let pieseDebounceTimer: number;
 	async function handlePieseInput(e: Event, index: number, tip: 'inlocuite' | 'necesare') {
 		const input = e.target as HTMLInputElement;
@@ -276,6 +369,9 @@
 <div class="max-w-7xl mx-auto my-5 p-5 border border-gray-300 bg-gray-50 font-sans rounded-lg">
 	<header class="relative text-center border-b-2 border-gray-800 pb-3 mb-5">
 		<h1 class="text-3xl font-bold">RAPORT LUCRU</h1>
+        <div class="absolute top-0 right-0">
+            <button type="button" on:click={() => showReportHistory = true} class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md">Istoric</button>
+        </div>
 		</header>
 
 	<form on:submit={handleSubmit}>
@@ -479,18 +575,38 @@
 														tabindex="0"
 														class="px-3 py-2 cursor-pointer hover:bg-gray-100"
 														on:mousedown={() => selectPiesa(sugestie)}
-														on:keydown={(e) => e.key === 'Enter' && selectPiesa(sugestie)}
-													>
-														<strong class="font-medium">{sugestie.pn}</strong> - {sugestie.descriere}
-													</div>
-												{/each}
-											</ul>
-										{/if}
-									</td>
-									<td class="border border-gray-300 p-1">
-										<input type="text" bind:value={piesa.descriere} class={inputClassTable} />
-									</td>
-									<td class="border border-gray-300 p-1">
+														                                        on:keydown={(e) => e.key === 'Enter' && selectPiesa(sugestie)}
+																											>
+																												<strong class="font-medium">{sugestie.pn}</strong> - {sugestie.descriere}
+																											</div>
+																										{/each}
+																									</ul>
+																								{/if}
+																							</td>
+																							<td class="border border-gray-300 p-1 relative">
+																								<input type="text" bind:value={piesa.descriere} class={inputClassTable} 
+														                                            on:input={(e) => handleDescriereInput(e, i, 'inlocuite')}
+														                                            on:blur={() => setTimeout(() => (showDescriereSugestii = false), 200)}
+														                                            on:focus={(e) => handleDescriereInput(e, i, 'inlocuite')}
+														                                        />
+														                                        {#if showDescriereSugestii && activeDescriereIndex === i && activeDescriereTip === 'inlocuite' && descriereSugestii.length > 0}
+														                                            <ul
+														                                                class="absolute top-full left-0 bg-white border border-gray-300 shadow-lg z-20 max-h-52 overflow-y-auto w-[300px]"
+														                                            >
+														                                                {#each descriereSugestii as sugestie (sugestie)}
+														                                                    <div
+														                                                        role="button"
+														                                                        tabindex="0"
+														                                                        class="px-3 py-2 cursor-pointer hover:bg-gray-100"
+														                                                        on:mousedown={() => selectDescriere(sugestie)}
+														                                                        on:keydown={(e) => e.key === 'Enter' && selectDescriere(sugestie)}
+														                                                    >
+														                                                        {sugestie}
+														                                                    </div>
+														                                                {/each}
+														                                            </ul>
+														                                        {/if}
+																							</td>									<td class="border border-gray-300 p-1">
 										<input type="number" min="1" bind:value={piesa.buc} class={inputClassTable} />
 									</td>
 									<td class="border border-gray-300 p-1">
@@ -551,8 +667,29 @@
 										                                                {/each}
 										                                            </ul>
 										                                        {/if}									</td>
-									<td class="border border-gray-300 p-1">
-										<input type="text" bind:value={piesa.descriere} class={inputClassTable} />
+									<td class="border border-gray-300 p-1 relative">
+										<input type="text" bind:value={piesa.descriere} class={inputClassTable} 
+                                            on:input={(e) => handleDescriereInput(e, i, 'necesare')}
+                                            on:blur={() => setTimeout(() => (showDescriereSugestii = false), 200)}
+                                            on:focus={(e) => handleDescriereInput(e, i, 'necesare')}
+                                        />
+                                        {#if showDescriereSugestii && activeDescriereIndex === i && activeDescriereTip === 'necesare' && descriereSugestii.length > 0}
+                                            <ul
+                                                class="absolute top-full left-0 bg-white border border-gray-300 shadow-lg z-20 max-h-52 overflow-y-auto w-[300px]"
+                                            >
+                                                {#each descriereSugestii as sugestie (sugestie)}
+                                                    <div
+                                                        role="button"
+                                                        tabindex="0"
+                                                        class="px-3 py-2 cursor-pointer hover:bg-gray-100"
+                                                        on:mousedown={() => selectDescriere(sugestie)}
+                                                        on:keydown={(e) => e.key === 'Enter' && selectDescriere(sugestie)}
+                                                    >
+                                                        {sugestie}
+                                                    </div>
+                                                {/each}
+                                            </ul>
+                                        {/if}
 									</td>
 									<td class="border border-gray-300 p-1">
 										<input type="number" min="1" bind:value={piesa.buc} class={inputClassTable} />
@@ -606,8 +743,28 @@
 					id="semnatura"
 					placeholder="Nume si prenume persoana de contact"
 					bind:value={raport.nume_semnatura_client}
+                    on:input={handleContactInput}
+                    on:blur={() => setTimeout(() => (showContactSugestii = false), 200)}
+                    on:focus={() => (showContactSugestii = raport.nume_semnatura_client.length > 0)}
 					class={inputClass}
 				/>
+                {#if showContactSugestii && contactSugestii.length > 0}
+                    <ul
+                        class="absolute bottom-full left-0 right-0 bg-white border border-gray-300 border-t-0 rounded-b-md shadow-lg z-10 max-h-52 overflow-y-auto"
+                    >
+                        {#each contactSugestii as sugestie (sugestie)}
+                            <div
+                                role="button"
+                                tabindex="0"
+                                class="px-3 py-2 cursor-pointer hover:bg-gray-100"
+                                on:mousedown={() => selectContact(sugestie)}
+                                on:keydown={(e) => e.key === 'Enter' && selectContact(sugestie)}
+                            >
+                                {sugestie}
+                            </div>
+                        {/each}
+                    </ul>
+                {/if}
 			</div>
 			<button
 				type="submit"
@@ -631,10 +788,40 @@
 	</form>
 
 	{#if showClientPopup}
-		<ClientPopup on:close={() => showClientPopup = false} on:clientSaved={(e) => {
-			raport.client = e.detail.nume;
-			raport.client_id = e.detail.client_id;
-			showClientPopup = false;
-		}} />
-	{/if}
-</div>
+		    <ClientPopup on:close={() => showClientPopup = false} on:clientSaved={(e) => {
+		        raport.client = e.detail.nume;
+		        raport.client_id = e.detail.client_id;
+		        showClientPopup = false;
+		    }} />
+		{/if}
+		
+		{#if showReportHistory}
+		    <ReportHistory 
+		        on:close={() => showReportHistory = false}
+		        on:edit={async (e) => {
+		            const raportId = e.detail;
+		            const res = await fetch(`${API_BASE_URL}/raport/${raportId}`);
+		            if(res.ok) {
+		                const data = await res.json();
+		                raport = data.raport;
+		                pieseInlocuite = data.pieseInlocuite;
+		                pieseNecesare = data.pieseNecesare;
+		                showReportHistory = false;
+		            }
+		        }}
+		        on:delete={async (e) => {
+		            const raportId = e.detail;
+		            if(confirm('Sunteti sigur ca doriti sa stergeti acest raport?')){
+		                const res = await fetch(`${API_BASE_URL}/raport/${raportId}`, { method: 'DELETE' });
+		                if(res.ok){
+		                    showReportHistory = false;
+		                }
+		            }
+		        }}
+		        on:generate={(e) => {
+		            const raportId = e.detail;
+		            window.open(`${API_BASE_URL}/raport/${raportId}/pdf`, '_blank');
+		        }}
+		    />
+		{/if}
+		</div>

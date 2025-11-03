@@ -120,6 +120,7 @@ def create_raport():
     raport = data['raport']
     piese_inlocuite = data['pieseInlocuite']
     piese_necesare = data['pieseNecesare']
+    raport_id = raport.get('id')
     
     conn = get_db_conn()
     cursor = conn.cursor()
@@ -143,25 +144,47 @@ def create_raport():
                     cursor.execute("SELECT id FROM Clienti WHERE nume = ?", (client_nume,))
                     client_id = cursor.fetchone()['id']
         
-        # Pas 2: Insereaza raportul principal
-        cursor.execute("""
-            INSERT INTO Rapoarte (
-                numar_raport, tehnician, data, este_revizie, este_reparatie, este_constatare, este_garantie,
-                client_id, client_nume_text, locatie, solicitare_client, utilaj, serie_utilaj, ore_funct,
-                operatii_efectuate, observatii, manopera_ore, km_efectuati, nume_semnatura_client
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, (
-            raport.get('numar'), raport.get('tehnician'), raport.get('data'),
-            raport.get('este_revizie', 0), raport.get('este_reparatie', 0),
-            raport.get('este_constatare', 0), raport.get('este_garantie', 0),
-            client_id, client_nume, raport.get('locatie'), raport.get('solicitare_client'),
-            raport.get('utilaj'), raport.get('serie'), raport.get('ore_funct'),
-            raport.get('operatii_efectuate'), raport.get('observatii'),
-            raport.get('manopera_ore'), raport.get('km_efectuati'),
-            raport.get('nume_semnatura_client')
-        ))
-        
-        raport_id = cursor.lastrowid # Aflam ID-ul raportului proaspat creat
+        if raport_id:
+            # Pas 2: Actualizeaza raportul principal
+            cursor.execute("""
+                UPDATE Rapoarte SET
+                    numar_raport = ?, tehnician = ?, data = ?, este_revizie = ?, este_reparatie = ?, este_constatare = ?, este_garantie = ?,
+                    client_id = ?, client_nume_text = ?, locatie = ?, solicitare_client = ?, utilaj = ?, serie_utilaj = ?, ore_funct = ?,
+                    operatii_efectuate = ?, observatii = ?, manopera_ore = ?, km_efectuati = ?, nume_semnatura_client = ?
+                WHERE id = ?
+            """, (
+                raport.get('numar'), raport.get('tehnician'), raport.get('data'),
+                raport.get('este_revizie', 0), raport.get('este_reparatie', 0),
+                raport.get('este_constatare', 0), raport.get('este_garantie', 0),
+                client_id, client_nume, raport.get('locatie'), raport.get('solicitare_client'),
+                raport.get('utilaj'), raport.get('serie'), raport.get('ore_funct'),
+                raport.get('operatii_efectuate'), raport.get('observatii'),
+                raport.get('manopera_ore'), raport.get('km_efectuati'),
+                raport.get('nume_semnatura_client'),
+                raport_id
+            ))
+            # Sterge piesele vechi
+            cursor.execute("DELETE FROM PieseInlocuite WHERE raport_id = ?", (raport_id,))
+            cursor.execute("DELETE FROM PieseNecesare WHERE raport_id = ?", (raport_id,))
+        else:
+            # Pas 2: Insereaza raportul principal
+            cursor.execute("""
+                INSERT INTO Rapoarte (
+                    numar_raport, tehnician, data, este_revizie, este_reparatie, este_constatare, este_garantie,
+                    client_id, client_nume_text, locatie, solicitare_client, utilaj, serie_utilaj, ore_funct,
+                    operatii_efectuate, observatii, manopera_ore, km_efectuati, nume_semnatura_client
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                raport.get('numar'), raport.get('tehnician'), raport.get('data'),
+                raport.get('este_revizie', 0), raport.get('este_reparatie', 0),
+                raport.get('este_constatare', 0), raport.get('este_garantie', 0),
+                client_id, client_nume, raport.get('locatie'), raport.get('solicitare_client'),
+                raport.get('utilaj'), raport.get('serie'), raport.get('ore_funct'),
+                raport.get('operatii_efectuate'), raport.get('observatii'),
+                raport.get('manopera_ore'), raport.get('km_efectuati'),
+                raport.get('nume_semnatura_client')
+            ))
+            raport_id = cursor.lastrowid # Aflam ID-ul raportului proaspat creat
         
         # Pas 3: Insereaza piesele inlocuite
         for piesa in piese_inlocuite:
@@ -178,6 +201,14 @@ def create_raport():
                     INSERT INTO PieseNecesare (raport_id, pn, descriere, buc)
                     VALUES (?, ?, ?, ?)
                 """, (raport_id, piesa.get('pn'), piesa.get('descriere'), piesa.get('buc')))
+
+        # Pas 5: Salveaza istoricul orelor de functionare
+        if raport.get('utilaj') and raport.get('serie') and raport.get('ore_funct'):
+            cursor.execute("SELECT id FROM Utilaje WHERE nume = ? AND serie = ?", (raport.get('utilaj'), raport.get('serie')))
+            utilaj_row = cursor.fetchone()
+            if utilaj_row:
+                utilaj_id = utilaj_row['id']
+                cursor.execute("INSERT INTO OreFunctHistory (utilaj_id, ore_funct, data, raport_id) VALUES (?, ?, ?, ?)", (utilaj_id, raport.get('ore_funct'), raport.get('data'), raport_id))
 
         conn.commit()
         return jsonify({"success": True, "raport_id": raport_id, "message": "Raport salvat cu succes"}), 201
@@ -336,6 +367,84 @@ def get_utilaj_history(utilaj_id):
     history = [dict(row) for row in cursor.fetchall()]
     conn.close()
     return jsonify(history)
+
+@app.route('/api/search/piese-descriere', methods=['GET'])
+def search_piese_descriere():
+    query = request.args.get('q', '')
+    if len(query) < 2:
+        return jsonify([])
+        
+    conn = get_db_conn()
+    cursor = conn.cursor()
+    cursor.execute("SELECT DISTINCT descriere FROM PieseMaster WHERE descriere LIKE ? LIMIT 10", (f'%{query}%',))
+    piese = [row['descriere'] for row in cursor.fetchall()]
+    conn.close()
+    return jsonify(piese)
+
+@app.route('/api/raport/last-number', methods=['GET'])
+def get_last_report_number():
+    conn = get_db_conn()
+    cursor = conn.cursor()
+    cursor.execute("SELECT numar_raport FROM Rapoarte ORDER BY id DESC LIMIT 1")
+    last_number = cursor.fetchone()
+    conn.close()
+    if last_number:
+        return jsonify(last_number['numar_raport'])
+    else:
+        return jsonify(None)
+
+@app.route('/api/rapoarte', methods=['GET'])
+def get_rapoarte():
+    conn = get_db_conn()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, numar_raport, client_nume_text, data FROM Rapoarte ORDER BY id DESC")
+    rapoarte = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return jsonify(rapoarte)
+
+@app.route('/api/raport/<int:raport_id>', methods=['GET'])
+def get_raport(raport_id):
+    conn = get_db_conn()
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT * FROM Rapoarte WHERE id = ?", (raport_id,))
+    raport_data = cursor.fetchone()
+    
+    if not raport_data:
+        return "Raport negasit", 404
+        
+    cursor.execute("SELECT * FROM PieseInlocuite WHERE raport_id = ?", (raport_id,))
+    piese_inlocuite_data = cursor.fetchall()
+    
+    cursor.execute("SELECT * FROM PieseNecesare WHERE raport_id = ?", (raport_id,))
+    piese_necesare_data = cursor.fetchall()
+    conn.close()
+
+    raport = dict(raport_data)
+    piese_inlocuite = [dict(p) for p in piese_inlocuite_data]
+    piese_necesare = [dict(p) for p in piese_necesare_data]
+
+    return jsonify({
+        'raport': raport,
+        'pieseInlocuite': piese_inlocuite,
+        'pieseNecesare': piese_necesare
+    })
+
+@app.route('/api/raport/<int:raport_id>', methods=['DELETE'])
+def delete_raport(raport_id):
+    conn = get_db_conn()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("DELETE FROM Rapoarte WHERE id = ?", (raport_id,))
+        cursor.execute("DELETE FROM PieseInlocuite WHERE raport_id = ?", (raport_id,))
+        cursor.execute("DELETE FROM PieseNecesare WHERE raport_id = ?", (raport_id,))
+        conn.commit()
+        return jsonify({"success": True, "message": "Raport sters cu succes"}), 200
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"success": False, "message": str(e)}), 500
+    finally:
+        conn.close()
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
