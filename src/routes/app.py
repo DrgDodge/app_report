@@ -189,6 +189,13 @@ def create_raport():
         # Pas 3: Insereaza piesele inlocuite
         for piesa in piese_inlocuite:
             if piesa.get('pn') or piesa.get('descriere'): # Adauga doar daca e ceva completat
+                # Check if part exists in PieseMaster
+                cursor.execute("SELECT id FROM PieseMaster WHERE pn = ?", (piesa.get('pn'),))
+                row = cursor.fetchone()
+                if not row:
+                    # Insert into PieseMaster
+                    cursor.execute("INSERT OR IGNORE INTO PieseMaster (pn, descriere) VALUES (?, ?)", (piesa.get('pn'), piesa.get('descriere')))
+
                 cursor.execute("""
                     INSERT INTO PieseInlocuite (raport_id, pn, descriere, buc)
                     VALUES (?, ?, ?, ?)
@@ -197,11 +204,17 @@ def create_raport():
         # Pas 4: Insereaza piesele necesare
         for piesa in piese_necesare:
              if piesa.get('pn') or piesa.get('descriere'):
+                # Check if part exists in PieseMaster
+                cursor.execute("SELECT id FROM PieseMaster WHERE pn = ?", (piesa.get('pn'),))
+                row = cursor.fetchone()
+                if not row:
+                    # Insert into PieseMaster
+                    cursor.execute("INSERT OR IGNORE INTO PieseMaster (pn, descriere) VALUES (?, ?)", (piesa.get('pn'), piesa.get('descriere')))
+
                 cursor.execute("""
                     INSERT INTO PieseNecesare (raport_id, pn, descriere, buc)
                     VALUES (?, ?, ?, ?)
-                """, (raport_id, piesa.get('pn'), piesa.get('descriere'), piesa.get('buc')))
-
+                """, (raport_id, piesa.get('pn'), piesa.get('descriere'), piesa.get('buc'))) 
         # Pas 5: Salveaza istoricul orelor de functionare
         if raport.get('utilaj') and raport.get('serie') and raport.get('ore_funct'):
             cursor.execute("SELECT id FROM Utilaje WHERE nume = ? AND serie = ?", (raport.get('utilaj'), raport.get('serie')))
