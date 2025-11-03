@@ -1,0 +1,252 @@
+
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <title>Raport de Lucru</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            font-size: 12px;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #fff;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 25px;
+            border: 1px solid #eee;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #4a90e2;
+        }
+
+        .header .company-details {
+            text-align: left;
+        }
+
+        .header .company-details h1 {
+            margin: 0;
+            font-size: 24px;
+            color: #4a90e2;
+        }
+        
+        .header .report-title {
+            text-align: right;
+        }
+
+        .report-title h2 {
+            margin: 0;
+            font-size: 28px;
+            color: #333;
+        }
+
+        .report-title p {
+            margin: 5px 0 0;
+            font-size: 14px;
+        }
+
+        .details-section {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+
+        .details-section div {
+            width: 48%;
+        }
+
+        .details-section p {
+            margin: 5px 0;
+            line-height: 1.6;
+        }
+
+        .details-section strong {
+            font-weight: 500;
+            color: #555;
+        }
+
+        .content-section {
+            margin-top: 30px;
+        }
+
+        .content-section h3 {
+            font-size: 16px;
+            color: #4a90e2;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+            margin-top: 25px;
+        }
+
+        .content-section .text-block {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #fff;
+            white-space: pre-wrap;
+            min-height: 80px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            font-weight: 500;
+        }
+
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #4a90e2;
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+        }
+        
+        .signature-box {
+            width: 45%;
+            margin-top: 20px;
+        }
+        
+        .signature-box .signature-line {
+            border-bottom: 1px solid #333;
+            height: 40px;
+            margin-top: 30px;
+        }
+        
+        .signature-box p {
+            text-align: center;
+            margin-top: 5px;
+            font-size: 11px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="company-details">
+                <h1>NUME COMPANIE</h1>
+                <p>Adresa Companie, Oras, Cod Postal</p>
+                <p>Email: contact@companie.ro | Telefon: 07xx xxx xxx</p>
+            </div>
+            <div class="report-title">
+                <h2>RAPORT DE LUCRU</h2>
+                <p><strong>Nr. Raport:</strong> {{ raport.numar_raport }}</p>
+                <p><strong>Data:</strong> {{ raport.data }}</p>
+            </div>
+        </div>
+
+        <div class="details-section">
+            <div>
+                <p><strong>Client:</strong> {{ raport.client_nume_text }}</p>
+                <p><strong>Locatie:</strong> {{ raport.locatie }}</p>
+                <p><strong>Tehnician:</strong> {{ raport.tehnician }}</p>
+            </div>
+            <div>
+                <p><strong>Utilaj:</strong> {{ raport.utilaj }}</p>
+                <p><strong>Serie Utilaj:</strong> {{ raport.serie_utilaj }}</p>
+                <p><strong>Ore Functionare:</strong> {{ raport.ore_funct }}</p>
+            </div>
+        </div>
+        
+        <div class="content-section">
+            <h3>Solicitare Client</h3>
+            <div class="text-block">{{ raport.solicitare_client }}</div>
+
+            <h3>Operatii Efectuate</h3>
+            <div class="text-block">{{ raport.operatii_efectuate }}</div>
+
+            <h3>Piese Inlocuite</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>P/N</th>
+                        <th>Descriere</th>
+                        <th>Cant.</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for piesa in piese_inlocuite %}
+                    <tr>
+                        <td>{{ piesa.pn }}</td>
+                        <td>{{ piesa.descriere }}</td>
+                        <td>{{ piesa.buc }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% if not piese_inlocuite %}
+                    <tr>
+                        <td colspan="3" style="text-align:center;">N/A</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+
+            <h3>Piese Necesare (Oferta)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>P/N</th>
+                        <th>Descriere</th>
+                        <th>Cant.</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for piesa in piese_necesare %}
+                    <tr>
+                        <td>{{ piesa.pn }}</td>
+                        <td>{{ piesa.descriere }}</td>
+                        <td>{{ piesa.buc }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% if not piese_necesare %}
+                    <tr>
+                        <td colspan="3" style="text-align:center;">N/A</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+            
+            <h3>Observatii / Recomandari Tehnician</h3>
+            <div class="text-block">{{ raport.observatii }}</div>
+        </div>
+
+        <div class="footer">
+            <div class="signature-box">
+                <p><strong>Semnatura Tehnician</strong></p>
+                <div class="signature-line"></div>
+                <p>{{ raport.tehnician }}</p>
+            </div>
+            <div class="signature-box">
+                <p><strong>Nume si Semnatura Client</strong></p>
+                <div class="signature-line"></div>
+                <p>{{ raport.nume_semnatura_client }}</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
