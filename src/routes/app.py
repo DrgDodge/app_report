@@ -258,6 +258,27 @@ def get_report_pdf(raport_id):
     piese_inlocuite = [dict(p) for p in piese_inlocuite_data]
     piese_necesare = [dict(p) for p in piese_necesare_data]
 
+    # Company data placeholder
+    companie = {
+        'nume': 'NUME COMPANIE',
+        'adresa': 'Adresa Companie, Oras, Cod Postal',
+        'email': 'contact@companie.ro',
+        'telefon': '07xx xxx xxx',
+        'logo': 'logo.png' # Assuming logo.png is in the static folder
+    }
+
+    # Determine report type
+    tip_raport = []
+    if raport.get('este_revizie'):
+        tip_raport.append('REVIZIE')
+    if raport.get('este_reparatie'):
+        tip_raport.append('REPARATIE')
+    if raport.get('este_constatare'):
+        tip_raport.append('CONSTATARE')
+    if raport.get('este_garantie'):
+        tip_raport.append('GARANTIE')
+    tip_raport_str = ', '.join(tip_raport)
+
     # 2. Genereaza PDF-ul din HTML
     try:
         # Incarca template-ul HTML
@@ -270,7 +291,9 @@ def get_report_pdf(raport_id):
             template_str, 
             raport=raport, 
             piese_inlocuite=piese_inlocuite, 
-            piese_necesare=piese_necesare
+            piese_necesare=piese_necesare,
+            companie=companie,
+            tip_raport=tip_raport_str
         )
 
         # Genereaza PDF
