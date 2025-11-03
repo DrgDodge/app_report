@@ -97,7 +97,7 @@ def get_client_details(client_id):
     conn = get_db_conn()
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT locatie, utilaj, serie_utilaj 
+        SELECT locatie
         FROM Rapoarte 
         WHERE client_id = ? 
         ORDER BY id DESC 
@@ -244,6 +244,98 @@ def get_report_pdf(raport_id):
         print(f"Error generating PDF: {e}")
         return jsonify({"success": False, "message": str(e)}), 500
 
+@app.route('/api/search/utilaje', methods=['GET'])
+def search_utilaje():
+    query = request.args.get('q', '')
+    if len(query) < 1:
+        return jsonify([])
+        
+    conn = get_db_conn()
+    cursor = conn.cursor()
+    cursor.execute("SELECT DISTINCT utilaj FROM Rapoarte WHERE utilaj LIKE ? LIMIT 10", (f'%{query}%',))
+    utilaje = [row['utilaj'] for row in cursor.fetchall()]
+    conn.close()
+    return jsonify(utilaje)
+
+@app.route('/api/search/serii', methods=['GET'])
+def search_serii():
+    query = request.args.get('q', '')
+    utilaj = request.args.get('utilaj', '')
+    if len(query) < 1:
+        return jsonify([])
+        
+    conn = get_db_conn()
+    cursor = conn.cursor()
+    cursor.execute("SELECT DISTINCT serie_utilaj FROM Rapoarte WHERE serie_utilaj LIKE ? AND utilaj = ? LIMIT 10", (f'%{query}%', utilaj))
+    serii = [row['serie_utilaj'] for row in cursor.fetchall()]
+    conn.close()
+    return jsonify(serii)
+
+@app.route('/api/search/ore-funct', methods=['GET'])
+def search_ore_funct():
+    utilaj = request.args.get('utilaj', '')
+    serie = request.args.get('serie', '')
+    
+    conn = get_db_conn()
+    cursor = conn.cursor()
+    cursor.execute("SELECT ore_funct FROM Rapoarte WHERE utilaj = ? AND serie_utilaj = ? ORDER BY id DESC LIMIT 1", (utilaj, serie))
+    ore_funct = cursor.fetchone()
+    conn.close()
+    
+    if ore_funct:
+        return jsonify(ore_funct['ore_funct'])
+    else:
+        return jsonify(None)
+
+@app.route('/api/client/<int:client_id>/contact', methods=['GET'])
+def get_client_contact(client_id):
+    conn = get_db_conn()
+    cursor = conn.cursor()
+    cursor.execute("SELECT nume_semnatura_client FROM Rapoarte WHERE client_id = ? ORDER BY id DESC LIMIT 1", (client_id,))
+    contact = cursor.fetchone()
+    conn.close()
+    
+    if contact:
+        return jsonify(contact['nume_semnatura_client'])
+    else:
+        return jsonify(None)
+
+@app.route('/api/client', methods=['POST'])
+def create_client():
+    data = request.json
+    conn = get_db_conn()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            INSERT INTO Clienti (nume, cui, nr_reg_com, iban, adresa)
+            VALUES (?, ?, ?, ?, ?)
+        """, (data.get('nume'), data.get('cui'), data.get('nr_reg_com'), data.get('iban'), data.get('adresa')))
+        client_id = cursor.lastrowid
+        conn.commit()
+        return jsonify({"success": True, "client_id": client_id, "message": "Client created successfully"}), 201
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"success": False, "message": str(e)}), 500
+    finally:
+        conn.close()
+
+@app.route('/api/client/<int:client_id>/utilaje', methods=['GET'])
+def get_client_utilaje(client_id):
+    conn = get_db_conn()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM Utilaje WHERE client_id = ?", (client_id,))
+    utilaje = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return jsonify(utilaje)
+
+@app.route('/api/utilaj/<int:utilaj_id>/history', methods=['GET'])
+def get_utilaj_history(utilaj_id):
+    conn = get_db_conn()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM OreFunctHistory WHERE utilaj_id = ? ORDER BY data DESC", (utilaj_id,))
+    history = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return jsonify(history)
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

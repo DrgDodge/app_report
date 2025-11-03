@@ -5,7 +5,9 @@ CREATE TABLE IF NOT EXISTS Clienti (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     nume TEXT NOT NULL UNIQUE,
     cui TEXT,
-    adresa_default TEXT
+    nr_reg_com TEXT,
+    iban TEXT,
+    adresa TEXT
 );
 
 -- Tabelul "master" pentru piese (pentru autocomplete)
@@ -13,6 +15,24 @@ CREATE TABLE IF NOT EXISTS PieseMaster (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     pn TEXT NOT NULL UNIQUE,  -- Part Number
     descriere TEXT
+);
+
+CREATE TABLE IF NOT EXISTS Utilaje (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    client_id INTEGER NOT NULL,
+    nume TEXT NOT NULL,
+    serie TEXT,
+    FOREIGN KEY (client_id) REFERENCES Clienti(id)
+);
+
+CREATE TABLE IF NOT EXISTS OreFunctHistory (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    utilaj_id INTEGER NOT NULL,
+    ore_funct INTEGER NOT NULL,
+    data TEXT NOT NULL,
+    raport_id INTEGER,
+    FOREIGN KEY (utilaj_id) REFERENCES Utilaje(id),
+    FOREIGN KEY (raport_id) REFERENCES Rapoarte(id)
 );
 
 -- Tabelul central care tine raportul

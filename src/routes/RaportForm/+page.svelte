@@ -1,4 +1,6 @@
 <script lang="ts">
+	import ClientPopup from './ClientPopup.svelte';
+
 	// --- Tipuri de date ---
 	interface Piesa {
 		pn: string;
@@ -68,14 +70,20 @@
 	let pieseNecesare = $state<Piesa[]>([]);
 
 	let clientSugestii = $state<ClientSugestie[]>([]);
+	let utilajSugestii = $state<string[]>([]);
+	let serieSugestii = $state<string[]>([]);
 	let pieseSugestii = $state<PiesaSugestie[]>([]);
 	let showClientSugestii = $state(false);
+	let showUtilajSugestii = $state(false);
+	let showSerieSugestii = $state(false);
 	let showPieseSugestii = $state(false);
 	let activePieseIndex = $state<number | null>(null); // Tine minte pt ce rand cautam piese
 	let activePieseTip = $state<'inlocuite' | 'necesare'>('inlocuite');
 
 	let statusMesaj = $state('');
 	let statusTip = $state<'succes' | 'eroare'>('succes');
+
+	let showClientPopup = $state(false);
 
 	// --- Functii pentru liste dinamice ---
 	function addPiesaInlocuita() {
@@ -125,13 +133,59 @@
 				if (res.ok) {
 					const details = await res.json();
 					if (details.locatie) raport.locatie = details.locatie;
-					if (details.utilaj) raport.utilaj = details.utilaj;
-					if (details.serie_utilaj) raport.serie = details.serie_utilaj;
 				}
 			} catch (error) {
 				console.error('Failed to fetch client details:', error);
 			}
 		}
+	}
+
+	let utilajDebounceTimer: number;
+	async function handleUtilajInput(e: Event) {
+		const input = e.target as HTMLInputElement;
+		raport.utilaj = input.value;
+		showUtilajSugestii = true;
+
+		clearTimeout(utilajDebounceTimer);
+		if (raport.utilaj.length < 1) {
+			utilajSugestii = [];
+			return;
+		}
+
+		utilajDebounceTimer = setTimeout(async () => {
+			const res = await fetch(`${API_BASE_URL}/search/utilaje?q=${raport.utilaj}`);
+			utilajSugestii = await res.json();
+		}, 300);
+	}
+
+	function selectUtilaj(sugestie: string) {
+		raport.utilaj = sugestie;
+		utilajSugestii = [];
+		showUtilajSugestii = false;
+	}
+
+	let serieDebounceTimer: number;
+	async function handleSerieInput(e: Event) {
+		const input = e.target as HTMLInputElement;
+		raport.serie = input.value;
+		showSerieSugestii = true;
+
+		clearTimeout(serieDebounceTimer);
+		if (raport.serie.length < 1) {
+			serieSugestii = [];
+			return;
+		}
+
+		serieDebounceTimer = setTimeout(async () => {
+			const res = await fetch(`${API_BASE_URL}/search/serii?q=${raport.serie}&utilaj=${raport.utilaj}`);
+			serieSugestii = await res.json();
+		}, 300);
+	}
+
+	function selectSerie(sugestie: string) {
+		raport.serie = sugestie;
+		serieSugestii = [];
+		showSerieSugestii = false;
 	}
 
 	let pieseDebounceTimer: number;
@@ -257,35 +311,38 @@
 
 		<div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5 border-b border-gray-300 pb-5">
 			<div class="flex flex-col gap-4">
-				<div class="relative flex flex-col">
-					<label for="client" class="font-bold text-sm mb-1 text-gray-700">Client</label>
-					<input
-						type="text"
-						id="client"
-						bind:value={raport.client}
-						on:input={handleClientInput}
-						on:blur={() => setTimeout(() => (showClientSugestii = false), 200)}
-						on:focus={() => (showClientSugestii = raport.client.length > 0)}
-						autocomplete="off"
-						class={inputClass}
-					/>
-					{#if showClientSugestii && clientSugestii.length > 0}
-						<ul
-							class="absolute top-full left-0 right-0 bg-white border border-gray-300 border-t-0 rounded-b-md shadow-lg z-10 max-h-52 overflow-y-auto"
-						>
-							{#each clientSugestii as sugestie (sugestie.id)}
-								<div
-									role="button"
-									tabindex="0"
-									class="px-3 py-2 cursor-pointer hover:bg-gray-100"
-									on:mousedown={() => selectClient(sugestie)}
-									on:keydown={(e) => e.key === 'Enter' && selectClient(sugestie)}
-								>
-									{sugestie.nume}
-								</div>
-							{/each}
-						</ul>
-					{/if}
+				<div class="relative flex items-end gap-2">
+					<div class="flex-grow flex flex-col">
+						<label for="client" class="font-bold text-sm mb-1 text-gray-700">Client</label>
+						<input
+							type="text"
+							id="client"
+							bind:value={raport.client}
+							on:input={handleClientInput}
+							on:blur={() => setTimeout(() => (showClientSugestii = false), 200)}
+							on:focus={() => (showClientSugestii = raport.client.length > 0)}
+							autocomplete="off"
+							class={inputClass}
+						/>
+						{#if showClientSugestii && clientSugestii.length > 0}
+							<ul
+								class="absolute top-full left-0 right-0 bg-white border border-gray-300 border-t-0 rounded-b-md shadow-lg z-10 max-h-52 overflow-y-auto"
+							>
+								{#each clientSugestii as sugestie (sugestie.id)}
+									<div
+										role="button"
+										tabindex="0"
+										class="px-3 py-2 cursor-pointer hover:bg-gray-100"
+										on:mousedown={() => selectClient(sugestie)}
+										on:keydown={(e) => e.key === 'Enter' && selectClient(sugestie)}
+									>
+										{sugestie.nume}
+									</div>
+								{/each}
+							</ul>
+						{/if}
+					</div>
+					<button type="button" on:click={() => showClientPopup = true} class="bg-blue-500 text-white p-2 rounded-md">+</button>
 				</div>
 				<div class="flex flex-col">
 					<label for="locatie" class="font-bold text-sm mb-1 text-gray-700">Locatie</label>
@@ -304,13 +361,65 @@
 				</div>
 			</div>
 			<div class="flex flex-col gap-4">
-				<div class="flex flex-col">
+				<div class="relative flex flex-col">
 					<label for="utilaj" class="font-bold text-sm mb-1 text-gray-700">Utilaj</label>
-					<input type="text" id="utilaj" bind:value={raport.utilaj} class={inputClass} />
+					<input
+						type="text"
+						id="utilaj"
+						bind:value={raport.utilaj}
+						on:input={handleUtilajInput}
+						on:blur={() => setTimeout(() => (showUtilajSugestii = false), 200)}
+						on:focus={() => (showUtilajSugestii = raport.utilaj.length > 0)}
+						autocomplete="off"
+						class={inputClass}
+					/>
+					{#if showUtilajSugestii && utilajSugestii.length > 0}
+						<ul
+							class="absolute top-full left-0 right-0 bg-white border border-gray-300 border-t-0 rounded-b-md shadow-lg z-10 max-h-52 overflow-y-auto"
+						>
+							{#each utilajSugestii as sugestie (sugestie)}
+								<div
+									role="button"
+									tabindex="0"
+									class="px-3 py-2 cursor-pointer hover:bg-gray-100"
+									on:mousedown={() => selectUtilaj(sugestie)}
+									on:keydown={(e) => e.key === 'Enter' && selectUtilaj(sugestie)}
+								>
+									{sugestie}
+								</div>
+							{/each}
+						</ul>
+					{/if}
 				</div>
-				<div class="flex flex-col">
+				<div class="relative flex flex-col">
 					<label for="serie" class="font-bold text-sm mb-1 text-gray-700">Serie</label>
-					<input type="text" id="serie" bind:value={raport.serie} class={inputClass} />
+					<input
+						type="text"
+						id="serie"
+						bind:value={raport.serie}
+						on:input={handleSerieInput}
+						on:blur={() => setTimeout(() => (showSerieSugestii = false), 200)}
+						on:focus={() => (showSerieSugestii = raport.serie.length > 0)}
+						autocomplete="off"
+						class={inputClass}
+					/>
+					{#if showSerieSugestii && serieSugestii.length > 0}
+						<ul
+							class="absolute top-full left-0 right-0 bg-white border border-gray-300 border-t-0 rounded-b-md shadow-lg z-10 max-h-52 overflow-y-auto"
+						>
+							{#each serieSugestii as sugestie (sugestie)}
+								<div
+									role="button"
+									tabindex="0"
+									class="px-3 py-2 cursor-pointer hover:bg-gray-100"
+									on:mousedown={() => selectSerie(sugestie)}
+									on:keydown={(e) => e.key === 'Enter' && selectSerie(sugestie)}
+								>
+									{sugestie}
+								</div>
+							{/each}
+						</ul>
+					{/if}
 				</div>
 				<div class="flex flex-col">
 					<label for="ore_funct" class="font-bold text-sm mb-1 text-gray-700">Ore funct</label>
@@ -520,4 +629,12 @@
 			</div>
 		{/if}
 	</form>
+
+	{#if showClientPopup}
+		<ClientPopup on:close={() => showClientPopup = false} on:clientSaved={(e) => {
+			raport.client = e.detail.nume;
+			raport.client_id = e.detail.client_id;
+			showClientPopup = false;
+		}} />
+	{/if}
 </div>
