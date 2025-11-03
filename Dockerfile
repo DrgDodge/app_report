@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y \
     libpangoft2-1.0-0 \
     libffi-dev \
     libcairo2 \
-    libgdk-pixbuf2.0-0
+    libgdk-pixbuf-xlib-2.0-0
 
 # Copy and install Python requirements
 COPY requirements.txt .
