@@ -1,11 +1,11 @@
 <script lang="ts">
-    const API_BASE_URL = 'http://127.0.0.1:5000/api';
+    const API_BASE_URL = 'http://127.0.0.1:5001/api';
 
     let initDbMessage = $state('');
-    let initDbStatus: 'idle' | 'success' | 'error' = 'idle';
+    let initDbStatus: 'idle' | 'success' | 'error' = $state('idle');
 
     let backupDbMessage = $state('');
-    let backupDbStatus: 'idle' | 'success' | 'error' = 'idle';
+    let backupDbStatus: 'idle' | 'success' | 'error' = $state('idle');
 
     async function initializeDatabase() {
         initDbMessage = 'Initializing database...';
@@ -64,7 +64,7 @@
         <h2 class="text-xl font-semibold mb-3">Database Initialization</h2>
         <p class="text-gray-700 mb-4">This will re-create all tables in the database based on <code>schema.sql</code>. <strong class="text-red-600">All existing data will be lost.</strong> Use with caution!</p>
         <button
-            on:click={initializeDatabase}
+            onclick={initializeDatabase}
             class="bg-red-600 text-white hover:bg-red-700 font-semibold px-4 py-2 rounded-md"
         >
             Initialize Database
@@ -78,7 +78,7 @@
         <h2 class="text-xl font-semibold mb-3">Database Backup</h2>
         <p class="text-gray-700 mb-4">This will download a backup of the current <code>date.db</code> file.</p>
         <button
-            on:click={backupDatabase}
+            onclick={backupDatabase}
             class="bg-green-600 text-white hover:bg-green-700 font-semibold px-4 py-2 rounded-md"
         >
             Create Database Backup
