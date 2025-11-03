@@ -23,15 +23,20 @@ def get_db_conn():
 @app.route('/api/admin/init-db', methods=['POST'])
 def init_db():
     try:
+        print("Initializing database...")
         conn = sqlite3.connect(DATABASE)
         script_dir = os.path.dirname(__file__)
         schema_path = os.path.join(script_dir, 'schema.sql')
         with open(schema_path, 'r') as f:
             schema_sql = f.read()
+        print("Executing schema script...")
         conn.executescript(schema_sql)
+        print("Schema script executed successfully.")
         conn.close()
+        print("Database initialized successfully.")
         return jsonify({"success": True, "message": "Database initialized successfully."}), 200
     except Exception as e:
+        print(f"Error initializing database: {e}")
         return jsonify({"success": False, "message": str(e)}), 500
 
 @app.route('/api/admin/backup-db', methods=['GET'])
@@ -403,38 +408,38 @@ def get_utilaj_history(utilaj_id):
     cursor.execute("SELECT * FROM OreFunctHistory WHERE utilaj_id = ? ORDER BY data DESC", (utilaj_id,))
     history = [dict(row) for row in cursor.fetchall()]
     conn.close()
-            return jsonify(history)
-    
-    @app.route('/api/companie', methods=['GET'])
-    def get_companie():
-        conn = get_db_conn()
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM Companie WHERE id = 1")
-        companie = cursor.fetchone()
+    return jsonify(history)
+
+@app.route('/api/companie', methods=['GET'])
+def get_companie():
+    conn = get_db_conn()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM Companie WHERE id = 1")
+    companie = cursor.fetchone()
+    conn.close()
+    if companie:
+        return jsonify(dict(companie))
+    else:
+        return jsonify({})
+
+@app.route('/api/companie', methods=['POST'])
+def update_companie():
+    data = request.json
+    conn = get_db_conn()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            UPDATE Companie SET
+                nume = ?, adresa = ?, email = ?, telefon = ?, logo = ?
+            WHERE id = 1
+        """, (data.get('nume'), data.get('adresa'), data.get('email'), data.get('telefon'), data.get('logo')))
+        conn.commit()
+        return jsonify({"success": True, "message": "Datele companiei au fost actualizate"}), 200
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"success": False, "message": str(e)}), 500
+    finally:
         conn.close()
-        if companie:
-            return jsonify(dict(companie))
-        else:
-            return jsonify({})
-    
-    @app.route('/api/companie', methods=['POST'])
-    def update_companie():
-        data = request.json
-        conn = get_db_conn()
-        cursor = conn.cursor()
-        try:
-            cursor.execute("""
-                UPDATE Companie SET
-                    nume = ?, adresa = ?, email = ?, telefon = ?, logo = ?
-                WHERE id = 1
-            """, (data.get('nume'), data.get('adresa'), data.get('email'), data.get('telefon'), data.get('logo')))
-            conn.commit()
-            return jsonify({"success": True, "message": "Datele companiei au fost actualizate"}), 200
-        except Exception as e:
-            conn.rollback()
-            return jsonify({"success": False, "message": str(e)}), 500
-        finally:
-            conn.close()
 @app.route('/api/search/piese-descriere', methods=['GET'])
 def search_piese_descriere():
     query = request.args.get('q', '')

@@ -39,12 +39,18 @@
             const response = await fetch(`${API_BASE_URL}/admin/init-db`, {
                 method: 'POST',
             });
-            const result = await response.json();
             if (response.ok) {
-                initDbMessage = result.message;
-                initDbStatus = 'success';
+                try {
+                    const result = await response.json();
+                    initDbMessage = result.message;
+                    initDbStatus = 'success';
+                } catch (e) {
+                    initDbMessage = 'Database initialized, but failed to parse response.';
+                    initDbStatus = 'success';
+                }
             } else {
-                throw new Error(result.message);
+                const errorText = await response.text();
+                throw new Error(errorText);
             }
         } catch (error: any) {
             initDbMessage = `Error: ${error.message}`;
@@ -113,7 +119,7 @@
         <h2 class="text-xl font-semibold mb-3">Database Initialization</h2>
         <p class="text-gray-700 mb-4">This will re-create all tables in the database based on <code>schema.sql</code>. <strong class="text-red-600">All existing data will be lost.</strong> Use with caution!</p>
         <button
-            on:click={initializeDatabase}
+            onclick={initializeDatabase}
             class="bg-red-600 text-white hover:bg-red-700 font-semibold px-4 py-2 rounded-md"
         >
             Initialize Database
@@ -127,7 +133,7 @@
         <h2 class="text-xl font-semibold mb-3">Database Backup</h2>
         <p class="text-gray-700 mb-4">This will download a backup of the current <code>date.db</code> file.</p>
         <button
-            on:click={backupDatabase}
+            onclick={backupDatabase}
             class="bg-green-600 text-white hover:bg-green-700 font-semibold px-4 py-2 rounded-md"
         >
             Create Database Backup
@@ -139,7 +145,7 @@
 
     <div class="mt-8 p-4 border border-yellow-200 bg-yellow-50 rounded-md">
         <h2 class="text-xl font-semibold mb-3">Date Companie</h2>
-        <form on:submit|preventDefault={updateCompanie}>
+        <form onsubmit|preventDefault={updateCompanie}>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="flex flex-col">
                     <label for="nume" class="font-bold text-sm mb-1 text-gray-700">Nume</label>
