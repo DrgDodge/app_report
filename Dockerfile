@@ -22,4 +22,4 @@ COPY . .
 EXPOSE 5000
 
 # Run the application
-CMD ["python", "src/routes/app.py"]
+CMD ["flask", "--app", "src/routes/app", "run", "--host=0.0.0.0"]

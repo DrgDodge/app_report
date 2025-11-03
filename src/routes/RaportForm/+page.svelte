@@ -223,7 +223,7 @@
 		<h1 class="text-3xl font-bold">RAPORT LUCRU</h1>
 		</header>
 
-	<form onsubmit|preventDefault={handleSubmit}>
+	<form on:submit|preventDefault={handleSubmit}>
 		<div class="grid grid-cols-1 md:grid-cols-[1fr_2fr_1fr] gap-4 mb-4">
 			<div class="flex flex-col">
 				<label for="nr_raport" class="font-bold text-sm mb-1 text-gray-700">Nr</label>
