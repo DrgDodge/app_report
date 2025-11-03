@@ -92,8 +92,7 @@
 	    let activeDescriereIndex = $state<number | null>(null);
 	    let activeDescriereTip = $state<'inlocuite' | 'necesare'>('inlocuite');
 	
-	    let contactSugestii = $state<string[]>([]);
-	    let showContactSugestii = $state(false);
+
 	
 	    // --- Functii pentru liste dinamice ---
 	    function addPiesaInlocuita() {
@@ -160,6 +159,7 @@
 				if (res.ok) {
 					const details = await res.json();
 					if (details.locatie) raport.locatie = details.locatie;
+					if (details.contact) raport.nume_semnatura_client = details.contact;
 				}
 			} catch (error) {
 				console.error('Failed to fetch client details:', error);
@@ -226,8 +226,6 @@
 	            pieseNecesare[index].descriere = query;
 	        }
 	
-	        activeDescriereIndex = index;
-	        activeDescriereTip = tip;
 	        showDescriereSugestii = true;
 	
 	        clearTimeout(descriereDebounceTimer);
@@ -254,32 +252,7 @@
 	        activeDescriereIndex = null;
 	    }
 	
-	    let contactDebounceTimer: number;
-	    async function handleContactInput(e: Event) {
-	        const input = e.target as HTMLInputElement;
-	        raport.nume_semnatura_client = input.value;
-	        showContactSugestii = true;
-	
-	        clearTimeout(contactDebounceTimer);
-	        if (raport.nume_semnatura_client.length < 1 || !raport.client_id) {
-	            contactSugestii = [];
-	            return;
-	        }
-	
-	        contactDebounceTimer = setTimeout(async () => {
-	            const res = await fetch(`${API_BASE_URL}/client/${raport.client_id}/contact`);
-	            const data = await res.json();
-	            if(data){
-	                contactSugestii = [data];
-	            }
-	        }, 300);
-	    }
-	
-	    function selectContact(sugestie: string) {
-	        raport.nume_semnatura_client = sugestie;
-	        contactSugestii = [];
-	        showContactSugestii = false;
-	    }
+
 	let pieseDebounceTimer: number;
 	async function handlePieseInput(e: Event, index: number, tip: 'inlocuite' | 'necesare') {
 		const input = e.target as HTMLInputElement;
@@ -291,8 +264,6 @@
 			pieseNecesare[index].pn = query;
 		}
 
-		activePieseIndex = index;
-		activePieseTip = tip;
 		showPieseSugestii = true;
 
 		clearTimeout(pieseDebounceTimer);
@@ -413,10 +384,13 @@
 							type="text"
 							id="client"
 							bind:value={raport.client}
-							                                                                                        on:input={handleClientInput}
-							                                                                                        on:blur={() => setTimeout(() => (showClientSugestii = false), 200)}
-							                                                                                        on:focus={() => { showClientSugestii = true; handleClientInput({ target: { value: raport.client } } as unknown as Event); }}
-							                                                                                        autocomplete="off"
+							class={inputClass}
+							on:input={handleClientInput}
+							on:blur={() => setTimeout(() => (showClientSugestii = false), 200)}
+							on:focus={() => {
+								showClientSugestii = true;
+							}}
+							autocomplete="off"
 						/>
 						{#if showClientSugestii && clientSugestii.length > 0}
 							<ul
@@ -427,12 +401,10 @@
 										role="button"
 										tabindex="0"
 										class="px-3 py-2 cursor-pointer hover:bg-gray-100"
-										on:mousedown={() => selectClient(sugestie)}
-										on:keydown={(e) => e.key === 'Enter' && selectClient(sugestie)}
-									>
-										{sugestie.nume}
-									</div>
-								{/each}
+																								on:mousedown={() => selectClient(sugestie)}
+																								>
+																									{sugestie.nume}
+																								</div>								{/each}
 							</ul>
 						{/if}
 					</div>
@@ -461,10 +433,14 @@
 						type="text"
 						id="utilaj"
 						bind:value={raport.utilaj}
-						                                                                                        on:input={handleUtilajInput}
-						                                                                                        on:blur={() => setTimeout(() => (showUtilajSugestii = false), 200)}
-						                                                                                        on:focus={() => { showUtilajSugestii = true; handleUtilajInput({ target: { value: raport.utilaj } } as unknown as Event); }}
-						                                                                                        autocomplete="off"					/>
+						class={inputClass}
+						on:input={handleUtilajInput}
+						on:blur={() => setTimeout(() => (showUtilajSugestii = false), 200)}
+						on:focus={() => {
+							showUtilajSugestii = true;
+						}}
+						autocomplete="off"
+					/>
 					{#if showUtilajSugestii && utilajSugestii.length > 0}
 						<ul
 							class="absolute top-full left-0 right-0 bg-white border border-gray-300 border-t-0 rounded-b-md shadow-lg z-10 max-h-52 overflow-y-auto"
@@ -474,12 +450,10 @@
 									role="button"
 									tabindex="0"
 									class="px-3 py-2 cursor-pointer hover:bg-gray-100"
-									on:mousedown={() => selectUtilaj(sugestie)}
-									on:keydown={(e) => e.key === 'Enter' && selectUtilaj(sugestie)}
-								>
-									{sugestie}
-								</div>
-							{/each}
+																							on:mousedown={() => selectUtilaj(sugestie)}
+																							>
+																								{sugestie}
+																							</div>							{/each}
 						</ul>
 					{/if}
 				</div>
@@ -489,10 +463,14 @@
 						type="text"
 						id="serie"
 						bind:value={raport.serie}
-						                                                                                        on:input={handleSerieInput}
-						                                                                                        on:blur={() => setTimeout(() => (showSerieSugestii = false), 200)}
-						                                                                                        on:focus={() => { showSerieSugestii = true; handleSerieInput({ target: { value: raport.serie } } as unknown as Event); }}
-						                                                                                        autocomplete="off"					/>
+						class={inputClass}
+						on:input={handleSerieInput}
+						on:blur={() => setTimeout(() => (showSerieSugestii = false), 200)}
+						on:focus={() => {
+							showSerieSugestii = true;
+						}}
+						autocomplete="off"
+					/>
 					{#if showSerieSugestii && serieSugestii.length > 0}
 						<ul
 							class="absolute top-full left-0 right-0 bg-white border border-gray-300 border-t-0 rounded-b-md shadow-lg z-10 max-h-52 overflow-y-auto"
@@ -502,12 +480,10 @@
 									role="button"
 									tabindex="0"
 									class="px-3 py-2 cursor-pointer hover:bg-gray-100"
-									on:mousedown={() => selectSerie(sugestie)}
-									on:keydown={(e) => e.key === 'Enter' && selectSerie(sugestie)}
-								>
-									{sugestie}
-								</div>
-							{/each}
+																							on:mousedown={() => selectSerie(sugestie)}
+																							>
+																								{sugestie}
+																							</div>							{/each}
 						</ul>
 					{/if}
 				</div>
@@ -555,9 +531,15 @@
 										<input
 											type="text"
 											bind:value={piesa.pn}
-											                                                                                                                                                                                                            on:input={(e) => handlePieseInput(e, i, 'inlocuite')}
-											                                                                                                                                                                                                            on:blur={() => setTimeout(() => (showPieseSugestii = false), 200)}
-											                                                                                                                                                                                                            on:focus={(e) => { showPieseSugestii = true; handlePieseInput(e, i, 'inlocuite'); }}										/>
+											class={inputClassTable}
+											on:blur={() => setTimeout(() => (showPieseSugestii = false), 200)}
+											on:input={(e) => handlePieseInput(e, i, 'inlocuite')}
+											on:focus={() => {
+												activePieseIndex = i;
+												activePieseTip = 'inlocuite';
+												showPieseSugestii = true;
+											}}
+										/>
 										{#if showPieseSugestii && activePieseIndex === i && activePieseTip === 'inlocuite' && pieseSugestii.length > 0}
 											<ul
 												class="absolute top-full left-0 bg-white border border-gray-300 shadow-lg z-20 max-h-52 overflow-y-auto w-[300px]"
@@ -568,37 +550,37 @@
 														tabindex="0"
 														class="px-3 py-2 cursor-pointer hover:bg-gray-100"
 														on:mousedown={() => selectPiesa(sugestie)}
-														                                        on:keydown={(e) => e.key === 'Enter' && selectPiesa(sugestie)}
-																											>
-																												<strong class="font-medium">{sugestie.pn}</strong> - {sugestie.descriere}
-																											</div>
+													>
+														<strong class="font-medium">{sugestie.pn}</strong> - {sugestie.descriere}
+													</div>
 																										{/each}
 																									</ul>
 																								{/if}
 																							</td>
 																							<td class="border border-gray-300 p-1 relative">
 																								<input type="text" bind:value={piesa.descriere} class={inputClassTable} 
-														                                                                                                                                                                                                            on:input={(e) => handleDescriereInput(e, i, 'inlocuite')}
-														                                                                                                                                                                                                            on:blur={() => setTimeout(() => (showDescriereSugestii = false), 200)}
-														                                                                                                                                                                                                            on:focus={(e) => { showDescriereSugestii = true; handleDescriereInput(e, i, 'inlocuite'); }}														                                        />
-														                                        {#if showDescriereSugestii && activeDescriereIndex === i && activeDescriereTip === 'inlocuite' && descriereSugestii.length > 0}
-														                                            <ul
-														                                                class="absolute top-full left-0 bg-white border border-gray-300 shadow-lg z-20 max-h-52 overflow-y-auto w-[300px]"
-														                                            >
-														                                                {#each descriereSugestii as sugestie (sugestie)}
-														                                                    <div
-														                                                        role="button"
-														                                                        tabindex="0"
-														                                                        class="px-3 py-2 cursor-pointer hover:bg-gray-100"
-														                                                        on:mousedown={() => selectDescriere(sugestie)}
-														                                                        on:keydown={(e) => e.key === 'Enter' && selectDescriere(sugestie)}
-														                                                    >
-														                                                        {sugestie}
-														                                                    </div>
-														                                                {/each}
-														                                            </ul>
-														                                        {/if}
-																							</td>									<td class="border border-gray-300 p-1">
+														                                                                                                                                                                                                            on:focus={() => {
+                                                                                    showDescriereSugestii = true;
+                                                                                    activeDescriereIndex = i;
+                                                                                    activeDescriereTip = 'inlocuite';
+                                                                                }}
+                                        />
+														                                                                                                                        {#if showDescriereSugestii && activeDescriereIndex === i && activeDescriereTip === 'inlocuite' && descriereSugestii.length > 0}
+														                                                                                                                            <ul
+														                                                                                                                                class="absolute top-full left-0 bg-white border border-gray-300 shadow-lg z-20 max-h-52 overflow-y-auto w-[300px]"
+														                                                                                                                            >
+														                                                                                                                                {#each descriereSugestii as sugestie (sugestie)}
+														                                                                                                                                    <div
+														                                                                                                                                        role="button"
+														                                                                                                                                        tabindex="0"
+														                                                                                                                                        class="px-3 py-2 cursor-pointer hover:bg-gray-100"
+														                                                                                                                                        on:mousedown={() => selectDescriere(sugestie)}
+														                                                                                                                                    >
+														                                                                                                                                        {sugestie}
+														                                                                                                                                    </div>
+														                                                                                                                                {/each}
+														                                                                                                                            </ul>
+														                                                                                                                        {/if}																							</td>									<td class="border border-gray-300 p-1">
 										<input type="number" min="1" bind:value={piesa.buc} class={inputClassTable} />
 									</td>
 									<td class="border border-gray-300 p-1">
@@ -637,10 +619,15 @@
 										<input
 											type="text"
 											bind:value={piesa.pn}
-											                                                                                                                                                                on:input={(e) => handlePieseInput(e, i, 'necesare')}
-											                                                                                                                                                                on:blur={() => setTimeout(() => (showPieseSugestii = false), 200)}
-											                                                                                                                                                                on:focus={(e) => { showPieseSugestii = true; handlePieseInput(e, i, 'necesare'); }}										/>
-										                                        {#if showPieseSugestii && activePieseIndex === i && activePieseTip === 'necesare' && pieseSugestii.length > 0}
+											class={inputClassTable}
+																																	on:blur={() => setTimeout(() => (showPieseSugestii = false), 200)}
+																																	on:input={(e) => handlePieseInput(e, i, 'necesare')}
+																																	on:focus={() => {
+																																		activePieseIndex = i;
+																																		activePieseTip = 'necesare';
+																																		showPieseSugestii = true;
+																																	}}
+																																/>										                                        {#if showPieseSugestii && activePieseIndex === i && activePieseTip === 'necesare' && pieseSugestii.length > 0}
 										                                            <ul
 										                                                class="absolute top-full left-0 bg-white border border-gray-300 shadow-lg z-20 max-h-52 overflow-y-auto w-[300px]"
 										                                            >
@@ -650,7 +637,6 @@
 										                                                        tabindex="0"
 										                                                        class="px-3 py-2 cursor-pointer hover:bg-gray-100"
 										                                                        on:mousedown={() => selectPiesa(sugestie)}
-										                                                        on:keydown={(e) => e.key === 'Enter' && selectPiesa(sugestie)}
 										                                                    >
 										                                                        <strong class="font-medium">{sugestie.pn}</strong> - {sugestie.descriere}
 										                                                    </div>
@@ -659,9 +645,13 @@
 										                                        {/if}									</td>
 									<td class="border border-gray-300 p-1 relative">
 										<input type="text" bind:value={piesa.descriere} class={inputClassTable} 
-                                                                                on:input={(e) => handleDescriereInput(e, i, 'necesare')}
+                                                                                on:focus={() => { 
+                                                                                    showDescriereSugestii = true; 
+                                                                                    activeDescriereIndex = i;
+                                                                                    activeDescriereTip = 'necesare';
+                                                                                }}
                                                                                 on:blur={() => setTimeout(() => (showDescriereSugestii = false), 200)}
-                                                                                on:focus={(e) => { showDescriereSugestii = true; handleDescriereInput(e, i, 'necesare'); }}
+                                                                                on:input={(e) => handleDescriereInput(e, i, 'necesare')}
                                         />
                                         {#if showDescriereSugestii && activeDescriereIndex === i && activeDescriereTip === 'necesare' && descriereSugestii.length > 0}
                                             <ul
@@ -673,7 +663,6 @@
                                                         tabindex="0"
                                                         class="px-3 py-2 cursor-pointer hover:bg-gray-100"
                                                         on:mousedown={() => selectDescriere(sugestie)}
-                                                        on:keydown={(e) => e.key === 'Enter' && selectDescriere(sugestie)}
                                                     >
                                                         {sugestie}
                                                     </div>
@@ -724,7 +713,7 @@
 		</div>
 
 		<footer class="flex flex-col md:flex-row justify-between items-end gap-5 border-t border-gray-300 pt-5 mt-5">
-			<div class="flex-grow flex flex-col w-full">
+			<div class="flex-grow flex flex-col w-full relative">
 				<label for="semnatura" class="font-bold text-sm mb-1 text-gray-700"
 					>CLIENT (nume, prenume, functie, semn., stampila)</label
 				>
@@ -733,27 +722,10 @@
 					id="semnatura"
 					placeholder="Nume si prenume persoana de contact"
 					bind:value={raport.nume_semnatura_client}
-                                                            on:input={handleContactInput}
-                                                            on:blur={() => setTimeout(() => (showContactSugestii = false), 200)}
-                                                            on:focus={() => { showContactSugestii = true; handleContactInput({ target: { value: raport.nume_semnatura_client } } as unknown as Event); }}				/>
-                {#if showContactSugestii && contactSugestii.length > 0}
-                    <ul
-                        class="absolute bottom-full left-0 right-0 bg-white border border-gray-300 border-t-0 rounded-b-md shadow-lg z-10 max-h-52 overflow-y-auto"
-                    >
-                        {#each contactSugestii as sugestie (sugestie)}
-                            <div
-                                role="button"
-                                tabindex="0"
-                                class="px-3 py-2 cursor-pointer hover:bg-gray-100"
-                                on:mousedown={() => selectContact(sugestie)}
-                                on:keydown={(e) => e.key === 'Enter' && selectContact(sugestie)}
-                            >
-                                {sugestie}
-                            </div>
-                        {/each}
-                    </ul>
-                {/if}
-			</div>
+					class={inputClass}
+					readonly
+				/>
+							</div>
 			<button
 				type="submit"
 				class="w-full md:w-auto bg-blue-600 text-white hover:bg-blue-700 font-semibold px-6 py-3 text-lg rounded-md h-fit"
