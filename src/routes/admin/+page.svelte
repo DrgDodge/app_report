@@ -66,7 +66,7 @@
         <h2 class="text-xl font-semibold mb-3">Database Initialization</h2>
         <p class="text-gray-700 mb-4">This will re-create all tables in the database based on <code>schema.sql</code>. <strong class="text-red-600">All existing data will be lost.</strong> Use with caution!</p>
         <button
-            onclick={initializeDatabase}
+            on:click={initializeDatabase}
             class="bg-red-600 text-white hover:bg-red-700 font-semibold px-4 py-2 rounded-md"
         >
             Initialize Database
@@ -80,7 +80,7 @@
         <h2 class="text-xl font-semibold mb-3">Database Backup</h2>
         <p class="text-gray-700 mb-4">This will download a backup of the current <code>date.db</code> file.</p>
         <button
-            onclick={backupDatabase}
+            on:click={backupDatabase}
             class="bg-green-600 text-white hover:bg-green-700 font-semibold px-4 py-2 rounded-md"
         >
             Create Database Backup
