@@ -91,3 +91,14 @@ INSERT OR IGNORE INTO Clienti (nume, cui) VALUES ('Client Exemplu SRL', 'RO12345
 INSERT OR IGNORE INTO Clienti (nume, cui) VALUES ('Alt Client SA', 'RO654321');
 INSERT OR IGNORE INTO PieseMaster (pn, descriere) VALUES ('F-102-300', 'Filtru ulei');
 INSERT OR IGNORE INTO PieseMaster (pn, descriere) VALUES ('S-500-A', 'Senzor presiune');
+
+CREATE TABLE IF NOT EXISTS Companie (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nume TEXT,
+    adresa TEXT,
+    email TEXT,
+    telefon TEXT,
+    logo TEXT
+);
+
+INSERT OR IGNORE INTO Companie (id, nume, adresa, email, telefon, logo) VALUES (1, 'NUME COMPANIE', 'Adresa Companie, Oras, Cod Postal', 'contact@companie.ro', '07xx xxx xxx', 'logo.png');

@@ -251,21 +251,17 @@ def get_report_pdf(raport_id):
     
     cursor.execute("SELECT * FROM PieseNecesare WHERE raport_id = ?", (raport_id,))
     piese_necesare_data = cursor.fetchall()
+
+    cursor.execute("SELECT * FROM Companie WHERE id = 1")
+    companie_data = cursor.fetchone()
+
     conn.close()
 
     # Convert data to dictionaries for easier use in template
     raport = dict(raport_data)
     piese_inlocuite = [dict(p) for p in piese_inlocuite_data]
     piese_necesare = [dict(p) for p in piese_necesare_data]
-
-    # Company data placeholder
-    companie = {
-        'nume': 'NUME COMPANIE',
-        'adresa': 'Adresa Companie, Oras, Cod Postal',
-        'email': 'contact@companie.ro',
-        'telefon': '07xx xxx xxx',
-        'logo': 'logo.png' # Assuming logo.png is in the static folder
-    }
+    companie = dict(companie_data) if companie_data else {}
 
     # Determine report type
     tip_raport = []
@@ -285,6 +281,11 @@ def get_report_pdf(raport_id):
         template_path = os.path.join(os.path.dirname(__file__), 'templates', 'report_template.html')
         with open(template_path, 'r', encoding='utf-8') as f:
             template_str = f.read()
+
+        # Make logo path absolute
+        if companie.get('logo'):
+            logo_path = os.path.join(os.path.dirname(__file__), '..', 'static', companie['logo'])
+            companie['logo'] = logo_path
 
         # Randare HTML cu date
         html_rendered = render_template_string(
@@ -402,8 +403,38 @@ def get_utilaj_history(utilaj_id):
     cursor.execute("SELECT * FROM OreFunctHistory WHERE utilaj_id = ? ORDER BY data DESC", (utilaj_id,))
     history = [dict(row) for row in cursor.fetchall()]
     conn.close()
-    return jsonify(history)
-
+            return jsonify(history)
+    
+    @app.route('/api/companie', methods=['GET'])
+    def get_companie():
+        conn = get_db_conn()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM Companie WHERE id = 1")
+        companie = cursor.fetchone()
+        conn.close()
+        if companie:
+            return jsonify(dict(companie))
+        else:
+            return jsonify({})
+    
+    @app.route('/api/companie', methods=['POST'])
+    def update_companie():
+        data = request.json
+        conn = get_db_conn()
+        cursor = conn.cursor()
+        try:
+            cursor.execute("""
+                UPDATE Companie SET
+                    nume = ?, adresa = ?, email = ?, telefon = ?, logo = ?
+                WHERE id = 1
+            """, (data.get('nume'), data.get('adresa'), data.get('email'), data.get('telefon'), data.get('logo')))
+            conn.commit()
+            return jsonify({"success": True, "message": "Datele companiei au fost actualizate"}), 200
+        except Exception as e:
+            conn.rollback()
+            return jsonify({"success": False, "message": str(e)}), 500
+        finally:
+            conn.close()
 @app.route('/api/search/piese-descriere', methods=['GET'])
 def search_piese_descriere():
     query = request.args.get('q', '')
