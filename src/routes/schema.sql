@@ -67,7 +67,7 @@ CREATE TABLE IF NOT EXISTS PieseNecesare (
 );
 
 -- Introducem cativa clienti si piese de test
-INSERT INTO Clienti (nume, cui) VALUES ('Client Exemplu SRL', 'RO123456');
-INSERT INTO Clienti (nume, cui) VALUES ('Alt Client SA', 'RO654321');
-INSERT INTO PieseMaster (pn, descriere) VALUES ('F-102-300', 'Filtru ulei');
-INSERT INTO PieseMaster (pn, descriere) VALUES ('S-500-A', 'Senzor presiune');
+INSERT OR IGNORE INTO Clienti (nume, cui) VALUES ('Client Exemplu SRL', 'RO123456');
+INSERT OR IGNORE INTO Clienti (nume, cui) VALUES ('Alt Client SA', 'RO654321');
+INSERT OR IGNORE INTO PieseMaster (pn, descriere) VALUES ('F-102-300', 'Filtru ulei');
+INSERT OR IGNORE INTO PieseMaster (pn, descriere) VALUES ('S-500-A', 'Senzor presiune');

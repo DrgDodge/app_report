@@ -137,8 +137,11 @@ def create_raport():
                 client_id = row['id']
             else:
                 # Daca nu exista, creeaza-l
-                cursor.execute("INSERT INTO Clienti (nume) VALUES (?)", (client_nume,))
+                cursor.execute("INSERT OR IGNORE INTO Clienti (nume) VALUES (?)", (client_nume,))
                 client_id = cursor.lastrowid
+                if not client_id:
+                    cursor.execute("SELECT id FROM Clienti WHERE nume = ?", (client_nume,))
+                    client_id = cursor.fetchone()['id']
         
         # Pas 2: Insereaza raportul principal
         cursor.execute("""

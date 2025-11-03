@@ -39,7 +39,7 @@
 	}
 
 	// URL-ul API-ului tau Flask (schimba-l daca e cazul)
-	const API_BASE_URL = 'http://backend:5000/api';
+	const API_BASE_URL = '/api';
 
 	// --- Starea componentei ---
 	let raport = $state<Raport>({
@@ -176,7 +176,8 @@
 	}
 
 	// --- Functie de Salvare ---
-	async function handleSubmit() {
+	async function handleSubmit(event: Event) {
+		event.preventDefault();
 		statusMesaj = 'Se salveaza...';
 		statusTip = 'succes';
 
@@ -223,7 +224,7 @@
 		<h1 class="text-3xl font-bold">RAPORT LUCRU</h1>
 		</header>
 
-	<form on:submit|preventDefault={handleSubmit}>
+	<form on:submit={handleSubmit}>
 		<div class="grid grid-cols-1 md:grid-cols-[1fr_2fr_1fr] gap-4 mb-4">
 			<div class="flex flex-col">
 				<label for="nr_raport" class="font-bold text-sm mb-1 text-gray-700">Nr</label>
@@ -262,9 +263,9 @@
 						type="text"
 						id="client"
 						bind:value={raport.client}
-						oninput={handleClientInput}
-						onblur={() => setTimeout(() => (showClientSugestii = false), 200)}
-						onfocus={() => (showClientSugestii = raport.client.length > 0)}
+						on:input={handleClientInput}
+						on:blur={() => setTimeout(() => (showClientSugestii = false), 200)}
+						on:focus={() => (showClientSugestii = raport.client.length > 0)}
 						autocomplete="off"
 						class={inputClass}
 					/>
@@ -277,8 +278,8 @@
 									role="button"
 									tabindex="0"
 									class="px-3 py-2 cursor-pointer hover:bg-gray-100"
-									onmousedown={() => selectClient(sugestie)}
-									onkeydown={(e) => e.key === 'Enter' && selectClient(sugestie)}
+									on:mousedown={() => selectClient(sugestie)}
+									on:keydown={(e) => e.key === 'Enter' && selectClient(sugestie)}
 								>
 									{sugestie.nume}
 								</div>
@@ -355,8 +356,8 @@
 										<input
 											type="text"
 											bind:value={piesa.pn}
-											                                            oninput={(e) => handlePieseInput(e, i, 'inlocuite')}
-											                                            onblur={() => setTimeout(() => (showPieseSugestii = false), 200)}											onfocus={(e) => handlePieseInput(e, i, 'inlocuite')}
+											                                            on:input={(e) => handlePieseInput(e, i, 'inlocuite')}
+											                                            on:blur={() => setTimeout(() => (showPieseSugestii = false), 200)}											on:focus={(e) => handlePieseInput(e, i, 'inlocuite')}
 											class={inputClassTable}
 										/>
 										{#if showPieseSugestii && activePieseIndex === i && activePieseTip === 'inlocuite' && pieseSugestii.length > 0}
@@ -368,8 +369,8 @@
 														role="button"
 														tabindex="0"
 														class="px-3 py-2 cursor-pointer hover:bg-gray-100"
-														onmousedown={() => selectPiesa(sugestie)}
-														onkeydown={(e) => e.key === 'Enter' && selectPiesa(sugestie)}
+														on:mousedown={() => selectPiesa(sugestie)}
+														on:keydown={(e) => e.key === 'Enter' && selectPiesa(sugestie)}
 													>
 														<strong class="font-medium">{sugestie.pn}</strong> - {sugestie.descriere}
 													</div>
@@ -387,7 +388,7 @@
 										<button
 											type="button"
 											class="w-full bg-red-100 text-red-800 hover:bg-red-200 font-semibold px-2 py-1 rounded-md"
-											onclick={() => removePiesaInlocuita(i)}>X</button
+											on:click={() => removePiesaInlocuita(i)}>X</button
 										>
 									</td>
 								</tr>
@@ -397,7 +398,7 @@
 					<button
 						type="button"
 						class="bg-green-100 text-green-800 hover:bg-green-200 font-semibold px-2 py-1 rounded-md mt-2"
-						onclick={addPiesaInlocuita}>+ Adauga piesa</button
+						on:click={addPiesaInlocuita}>+ Adauga piesa</button
 					>
 				</div>
 
@@ -419,9 +420,9 @@
 										<input
 											type="text"
 											bind:value={piesa.pn}
-											oninput={(e) => handlePieseInput(e, i, 'necesare')}
-											onblur={() => setTimeout(() => (showPieseSugestii = false), 200)}
-											onfocus={(e) => handlePieseInput(e, i, 'necesare')}
+											on:input={(e) => handlePieseInput(e, i, 'necesare')}
+											on:blur={() => setTimeout(() => (showPieseSugestii = false), 200)}
+											on:focus={(e) => handlePieseInput(e, i, 'necesare')}
 											class={inputClassTable}
 										/>
 										                                        {#if showPieseSugestii && activePieseIndex === i && activePieseTip === 'necesare' && pieseSugestii.length > 0}
@@ -433,8 +434,8 @@
 										                                                        role="button"
 										                                                        tabindex="0"
 										                                                        class="px-3 py-2 cursor-pointer hover:bg-gray-100"
-										                                                        onmousedown={() => selectPiesa(sugestie)}
-										                                                        onkeydown={(e) => e.key === 'Enter' && selectPiesa(sugestie)}
+										                                                        on:mousedown={() => selectPiesa(sugestie)}
+										                                                        on:keydown={(e) => e.key === 'Enter' && selectPiesa(sugestie)}
 										                                                    >
 										                                                        <strong class="font-medium">{sugestie.pn}</strong> - {sugestie.descriere}
 										                                                    </div>
@@ -451,7 +452,7 @@
 										<button
 											type="button"
 											class="w-full bg-red-100 text-red-800 hover:bg-red-200 font-semibold px-2 py-1 rounded-md"
-											onclick={() => removePiesaNecesara(i)}>X</button
+											on:click={() => removePiesaNecesara(i)}>X</button
 										>
 									</td>
 								</tr>
@@ -461,62 +462,62 @@
 					<button
 						type="button"
 						class="bg-green-100 text-green-800 hover:bg-green-200 font-semibold px-2 py-1 rounded-md mt-2"
-						onclick={addPiesaNecesara}>+ Adauga piesa</button>
-										</div>
-						
-										<div class="grid grid-cols-2 gap-4 mt-auto">
-											<div class="flex flex-col">
-												<label for="manopera" class="font-bold text-sm mb-1 text-gray-700"
-													>Manopera (ore)</label
-												>
-												<input
-													type="number"
-													step="0.5"
-													id="manopera"
-													bind:value={raport.manopera_ore}
-													class={inputClass}
-												/>
-											</div>
-											<div class="flex flex-col">
-												<label for="km" class="font-bold text-sm mb-1 text-gray-700">Km efectuati</label>
-												<input type="number" id="km" bind:value={raport.km_efectuati} class={inputClass} />
-											</div>
-										</div>
-									</div>
-								</div>
-						
-								<footer class="flex flex-col md:flex-row justify-between items-end gap-5 border-t border-gray-300 pt-5 mt-5">
-									<div class="flex-grow flex flex-col w-full">
-										<label for="semnatura" class="font-bold text-sm mb-1 text-gray-700"
-											>CLIENT (nume, prenume, functie, semn., stampila)</label
-										>
-										<input
-											type="text"
-											id="semnatura"
-											placeholder="Nume si prenume persoana de contact"
-											bind:value={raport.nume_semnatura_client}
-											class={inputClass}
-										/>
-									</div>
-									<button
-										type="submit"
-										onclick={handleSubmit}
-										class="w-full md:w-auto bg-blue-600 text-white hover:bg-blue-700 font-semibold px-6 py-3 text-lg rounded-md h-fit"
-									>
-										Salveaza Raport si Genereaza PDF
-									</button>
-								</footer>
-						
-								{#if statusMesaj}
-									<div
-										class="mt-5 p-3 rounded-md text-center"
-										class:bg-green-100={statusTip === 'succes'}
-										class:text-green-800={statusTip === 'succes'}
-										class:bg-red-100={statusTip === 'eroare'}
-										class:text-red-800={statusTip === 'eroare'}
-									>
-										{statusMesaj}
-									</div>
-								{/if}
-							</form>
-						</div>
+						on:click={addPiesaNecesara}>+ Adauga piesa</button
+					>
+				</div>
+
+				<div class="grid grid-cols-2 gap-4 mt-auto">
+					<div class="flex flex-col">
+						<label for="manopera" class="font-bold text-sm mb-1 text-gray-700"
+							>Manopera (ore)</label
+						>
+						<input
+							type="number"
+							step="0.5"
+							id="manopera"
+							bind:value={raport.manopera_ore}
+							class={inputClass}
+						/>
+					</div>
+					<div class="flex flex-col">
+						<label for="km" class="font-bold text-sm mb-1 text-gray-700">Km efectuati</label>
+						<input type="number" id="km" bind:value={raport.km_efectuati} class={inputClass} />
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<footer class="flex flex-col md:flex-row justify-between items-end gap-5 border-t border-gray-300 pt-5 mt-5">
+			<div class="flex-grow flex flex-col w-full">
+				<label for="semnatura" class="font-bold text-sm mb-1 text-gray-700"
+					>CLIENT (nume, prenume, functie, semn., stampila)</label
+				>
+				<input
+					type="text"
+					id="semnatura"
+					placeholder="Nume si prenume persoana de contact"
+					bind:value={raport.nume_semnatura_client}
+					class={inputClass}
+				/>
+			</div>
+			<button
+				type="submit"
+				class="w-full md:w-auto bg-blue-600 text-white hover:bg-blue-700 font-semibold px-6 py-3 text-lg rounded-md h-fit"
+			>
+				Salveaza Raport si Genereaza PDF
+			</button>
+		</footer>
+
+		{#if statusMesaj}
+			<div
+				class="mt-5 p-3 rounded-md text-center"
+				class:bg-green-100={statusTip === 'succes'}
+				class:text-green-800={statusTip === 'succes'}
+				class:bg-red-100={statusTip === 'eroare'}
+				class:text-red-800={statusTip === 'eroare'}
+			>
+				{statusMesaj}
+			</div>
+		{/if}
+	</form>
+</div>
