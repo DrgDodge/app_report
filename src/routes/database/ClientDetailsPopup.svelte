@@ -46,11 +46,7 @@
                     <p><strong>Adresa:</strong> {clientDetails.client.adresa}</p>
                     <p><strong>Locatie:</strong> {clientDetails.client.locatie}</p>
                 </div>
-                <div>
-                    <h3 class="text-xl font-bold mb-2">Search</h3>
-                    <input type="text" placeholder="Search Clients..." class="w-full p-2 border border-gray-300 rounded-md mb-2" bind:value={clientSearch} />
-                    <input type="text" placeholder="Search Parts..." class="w-full p-2 border border-gray-300 rounded-md" bind:value={partSearch} />
-                </div>
+
             </div>
 
             <h3 class="text-xl font-bold mt-4 mb-2">Utilaje</h3>
