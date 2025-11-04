@@ -1,13 +1,14 @@
 <script lang="ts">
     import { fly } from 'svelte/transition';
     import { createEventDispatcher, onMount } from 'svelte';
+    import type { Client, Part } from './types';
 
-    export let clientDetails;
+    export let clientDetails: { client: Client, utilaje: any[] };
 
     const dispatch = createEventDispatcher();
 
-    let clients = [];
-    let parts = [];
+    let clients: Client[] = [];
+    let parts: Part[] = [];
     let clientSearch = '';
     let partSearch = '';
 
@@ -29,7 +30,7 @@
 </script>
 
 <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-     on:click|self={close}>
+     role="button" tabindex="0" on:click|self={close} on:keydown|self={e => e.key === 'Escape' && close()}>
     <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-4xl"
          in:fly={{ y: -50, duration: 300 }}
          out:fly={{ y: -50, duration: 300 }}>

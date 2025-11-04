@@ -1,10 +1,11 @@
 <script lang="ts">
     import { onMount } from 'svelte';
     import ClientDetailsPopup from './ClientDetailsPopup.svelte';
+    import type { Client, Part } from './types';
 
-    let clients = [];
-    let parts = [];
-    let selectedClientDetails = null;
+    let clients: Client[] = [];
+    let parts: Part[] = [];
+    let selectedClientDetails: { client: Client, utilaje: any[] } | null = null;
 
     onMount(async () => {
         const resClients = await fetch('/api/clients');
@@ -14,7 +15,7 @@
         parts = await resParts.json();
     });
 
-    async function showClientDetails(clientId) {
+    async function showClientDetails(clientId: number) {
         const res = await fetch(`/api/client/${clientId}/full_details`);
         selectedClientDetails = await res.json();
     }

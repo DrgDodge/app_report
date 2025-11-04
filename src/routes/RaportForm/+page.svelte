@@ -37,11 +37,16 @@
 		nume: string;
 	}
 
-	interface PiesaSugestie {
-		pn: string;
-		descriere: string;
-	}
-
+	    interface PiesaSugestie {
+			pn: string;
+			descriere: string;
+		}
+	
+	    interface UtilajSugestie {
+	        id: number;
+	        nume: string;
+	        serie: string;
+	    }
 	// URL-ul API-ului tau Flask (schimba-l daca e cazul)
 	const API_BASE_URL = '/api';
 
@@ -74,8 +79,7 @@
 	let pieseNecesare = $state<Piesa[]>([]);
 
 	let clientSugestii = $state<ClientSugestie[]>([]);
-	let utilajSugestii = $state<string[]>([]);
-	let serieSugestii = $state<string[]>([]);
+	    let utilajSugestii = $state<UtilajSugestie[]>([]);	let serieSugestii = $state<string[]>([]);
 	let pieseSugestii = $state<PiesaSugestie[]>([]);
 	let showClientSugestii = $state(false);
 	let showUtilajSugestii = $state(false);
@@ -197,8 +201,9 @@
 		}, 300);
 	}
 
-	function selectUtilaj(sugestie: string) {
-		raport.utilaj = sugestie;
+	function selectUtilaj(sugestie: UtilajSugestie) {
+		raport.utilaj = sugestie.nume;
+		raport.serie = sugestie.serie;
 		utilajSugestii = [];
 		showUtilajSugestii = false;
 	}
@@ -474,7 +479,7 @@
 									</ul>
 								{/if}
 						</div>
-						<button type="button" on:click={async () => {
+						<button type="button" onclick={async () => {
 							if (raport.client_id) {
 								const res = await fetch(`${API_BASE_URL}/client/${raport.client_id}/utilaje`);
 								if (res.ok) {
@@ -487,11 +492,7 @@
 					{#if showUtilajeList}
 						<ul class="absolute top-full left-0 right-0 bg-white border border-gray-300 border-t-0 rounded-b-md shadow-lg z-10 max-h-52 overflow-y-auto">
 							{#each utilajSugestii as utilaj (utilaj.id)}
-								<div role="button" tabindex="0" class="px-3 py-2 cursor-pointer hover:bg-gray-100" on:mousedown={() => {
-									raport.utilaj = utilaj.nume;
-									raport.serie = utilaj.serie;
-									showUtilajeList = false;
-								}}>
+								<div role="button" tabindex="0" class="px-3 py-2 cursor-pointer hover:bg-gray-100" onmousedown={() => selectUtilaj(utilaj)}>
 									{utilaj.nume} - {utilaj.serie}
 								</div>
 							{/each}
