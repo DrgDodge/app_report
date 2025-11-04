@@ -112,10 +112,18 @@ def get_client_details(client_id):
     details = cursor.fetchone()
     conn.close()
     
-    if details:
+    if details and details['locatie']:
         return jsonify(dict(details))
     else:
-        return jsonify({})
+        conn = get_db_conn()
+        cursor = conn.cursor()
+        cursor.execute("SELECT cui, adresa, locatie FROM Clienti WHERE id = ?", (client_id,))
+        client_details = cursor.fetchone()
+        conn.close()
+        if client_details:
+            return jsonify(dict(client_details))
+        else:
+            return jsonify({})
 
 # --- ENDPOINT PENTRU CREARE RAPORT ---
 

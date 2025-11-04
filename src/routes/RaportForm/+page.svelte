@@ -162,6 +162,7 @@
 
 	async function selectClient(sugestie: ClientSugestie) {
 		raport.client = sugestie.nume;
+		raport.nume_semnatura_client = sugestie.nume;
 		raport.client_id = sugestie.id;
 		clientSugestii = [];
 		showClientSugestii = false;
