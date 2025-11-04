@@ -348,11 +348,11 @@
 	<header class="relative text-center border-b-2 border-gray-800 pb-3 mb-5">
 		<h1 class="text-3xl font-bold">RAPORT LUCRU</h1>
         <div class="absolute top-0 right-0">
-            <button type="button" on:click={() => showReportHistory = true} class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md">Istoric</button>
+            <button type="button" onclick={() => showReportHistory = true} class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md">Istoric</button>
         </div>
 		</header>
 
-	<form on:submit={handleSubmit}>
+	<form onsubmit={handleSubmit}>
 		<div class="grid grid-cols-1 md:grid-cols-[1fr_2fr_1fr] gap-4 mb-4">
 			<div class="flex flex-col">
 				<label for="nr_raport" class="font-bold text-sm mb-1 text-gray-700">Nr</label>
@@ -393,9 +393,8 @@
 							id="client"
 							bind:value={raport.client}
 							class={inputClass}
-							on:input={handleClientInput}
-							on:blur={() => setTimeout(() => (showClientSugestii = false), 200)}
-							on:focus={() => {
+															oninput={handleClientInput}							onblur={() => setTimeout(() => (showClientSugestii = false), 200)}
+								onfocus={() => {
 								showClientSugestii = true;
 							}}
 							autocomplete="off"
@@ -410,14 +409,14 @@
 										role="button"
 										tabindex="0"
 										class="px-3 py-2 cursor-pointer hover:bg-gray-100"
-																								on:mousedown={() => selectClient(sugestie)}
+																								onmousedown={() => selectClient(sugestie)}
 																								>
 																									{sugestie.nume}
 																								</div>								{/each}
 							</ul>
 						{/if}
 					</div>
-					<button type="button" on:click={() => showClientPopup = true} class="bg-blue-500 text-white p-2 rounded-md">+</button>
+					<button type="button" onclick={() => showClientPopup = true} class="bg-blue-500 text-white p-2 rounded-md">+</button>
 				</div>
 				<div class="flex flex-col">
 					<label for="locatie" class="font-bold text-sm mb-1 text-gray-700">Locatie</label>
@@ -443,9 +442,8 @@
 						id="utilaj"
 						bind:value={raport.utilaj}
 						class={inputClass}
-						on:input={handleUtilajInput}
-						on:blur={() => setTimeout(() => (showUtilajSugestii = false), 200)}
-						on:focus={() => {
+													oninput={handleUtilajInput}						onblur={() => setTimeout(() => (showUtilajSugestii = false), 200)}
+						onfocus={() => {
 							showUtilajSugestii = true;
 						}}
 						autocomplete="off"
@@ -460,7 +458,7 @@
 									role="button"
 									tabindex="0"
 									class="px-3 py-2 cursor-pointer hover:bg-gray-100"
-																							on:mousedown={() => selectUtilaj(sugestie)}
+																							onmousedown={() => selectUtilaj(sugestie)}
 																							>
 																								{sugestie}
 																							</div>							{/each}
@@ -474,9 +472,8 @@
 						id="serie"
 						bind:value={raport.serie}
 						class={inputClass}
-						on:input={handleSerieInput}
-						on:blur={() => setTimeout(() => (showSerieSugestii = false), 200)}
-						on:focus={() => {
+													oninput={handleSerieInput}						onblur={() => setTimeout(() => (showSerieSugestii = false), 200)}
+						onfocus={() => {
 							showSerieSugestii = true;
 						}}
 						autocomplete="off"
@@ -491,7 +488,7 @@
 									role="button"
 									tabindex="0"
 									class="px-3 py-2 cursor-pointer hover:bg-gray-100"
-																							on:mousedown={() => selectSerie(sugestie)}
+																							onmousedown={() => selectSerie(sugestie)}
 																							>
 																								{sugestie}
 																							</div>							{/each}
@@ -544,9 +541,7 @@
 											type="text"
 											bind:value={piesa.pn}
 											class={inputClassTable}
-											on:blur={() => setTimeout(() => (showPieseSugestii = false), 200)}
-											on:input={(e) => handlePieseInput(e, i, 'inlocuite')}
-											on:focus={() => {
+											             onblur={() => setTimeout(() => (showPieseSugestii = false), 200)}											onfocus={() => {
 												activePieseIndex = i;
 												activePieseTip = 'inlocuite';
 												showPieseSugestii = true;
@@ -562,7 +557,7 @@
 														role="button"
 														tabindex="0"
 														class="px-3 py-2 cursor-pointer hover:bg-gray-100"
-														on:mousedown={() => selectPiesa(sugestie)}
+														onmousedown={() => selectPiesa(sugestie)}
 													>
 														<strong class="font-medium">{sugestie.pn}</strong> - {sugestie.descriere}
 													</div>
@@ -572,27 +567,26 @@
 																							</td>
 																							<td class="border border-gray-300 p-1 relative">
 																																															<input type="text" bind:value={piesa.descriere} class={inputClassTable} 
-																																					                                                                                                                                                                                                                                                                                            on:input={(e) => handleDescriereInput(e, i, 'inlocuite')}
-																																					                                                                                                                                                                                                                                                                                            on:blur={() => setTimeout(() => (showDescriereSugestii = false), 200)}
-																																					                                                                                                                                                                                                                                                                                            on:focus={() => { 
-																																					                                                                                                                                                                                                                                                                                                showDescriereSugestii = true; 
-																																					                                                                                                                                                                                                                                                                                                activeDescriereIndex = i;
-																																					                                                                                                                                                                                                                                                                                                activeDescriereTip = 'inlocuite';
-																																					                                                                                                                                                                                                                                                                                            }}
-																																					                                                                                                                                                                                                                                                    />														                                                                                                                        {#if showDescriereSugestii && activeDescriereIndex === i && activeDescriereTip === 'inlocuite' && descriereSugestii.length > 0}
+																																					                                                                                                                                                                                                                                                                                            oninput={(e) => handleDescriereInput(e, i, 'inlocuite')}
+																																					                                                                                                                                                                                                                                                                                            onblur={() => setTimeout(() => (showDescriereSugestii = false), 200)}
+																																					                                                                                                                                                                                                                                                                                            																									                                                                                                                                                                                                                                                                                            onfocus={() => { 
+																																					                                                                                                                                                                                                                                                                                            																									                                                                                                                                                                                                                                                                                                showDescriereSugestii = true; 
+																																					                                                                                                                                                                                                                                                                                            																									                                                                                                                                                                                                                                                                                                activeDescriereIndex = i;
+																																					                                                                                                                                                                                                                                                                                            																									                                                                                                                                                                                                                                                                                                activeDescriereTip = 'inlocuite';
+																																					                                                                                                                                                                                                                                                                                            																									                                                                                                                                                                                                                                                                                            }}																																					                                                                                                                                                                                                                                                    />														                                                                                                                        {#if showDescriereSugestii && activeDescriereIndex === i && activeDescriereTip === 'inlocuite' && descriereSugestii.length > 0}
 																																					                                                                                                                            <ul
 																																					                                                                                                                                class="absolute top-full left-0 bg-white border border-gray-300 shadow-lg z-20 max-h-52 overflow-y-auto w-[300px]"
 																																					                                                                                                                            >
-																																					                                                                                                                                {#each descriereSugestii as sugestie (sugestie.pn)}
-																																					                                                                                                                                														                                                                                                                                    <div
-																																					                                                                                                                                														                                                                                                                                        role="button"
-																																					                                                                                                                                														                                                                                                                                        tabindex="0"
-																																					                                                                                                                                														                                                                                                                                        class="px-3 py-2 cursor-pointer hover:bg-gray-100"
-																																					                                                                                                                                														                                                                                                                                        on:mousedown={() => selectDescriere(sugestie)}
-																																					                                                                                                                                														                                                                                                                                    >
-																																					                                                                                                                                														                                                                                                                                        <strong class="font-medium">{sugestie.pn}</strong> - {sugestie.descriere}
-																																					                                                                                                                                														                                                                                                                                    </div>
-																																					                                                                                                                                														                                                                                                                                {/each}																																					                                                                                                                            </ul>
+																																					                                                                                                                                                                                {#each descriereSugestii as sugestie (sugestie.pn)}
+																																					                                                                                                                                                                                    <div
+																																					                                                                                                                                                                                        role="button"
+																																					                                                                                                                                                                                        tabindex="0"
+																																					                                                                                                                                                                                        class="px-3 py-2 cursor-pointer hover:bg-gray-100"
+																																					                                                                                                                                                                                        onmousedown={() => selectDescriere(sugestie)}
+																																					                                                                                                                                                                                    >
+																																					                                                                                                                                                                                        <strong class="font-medium">{sugestie.pn}</strong> - {sugestie.descriere}
+																																					                                                                                                                                                                                    </div>
+																																					                                                                                                                                                                                {/each}																																					                                                                                                                            </ul>
 																																					                                                                                                                        {/if}																						</td>									<td class="border border-gray-300 p-1">
 										<input type="number" min="1" bind:value={piesa.buc} class={inputClassTable} />
 									</td>
@@ -600,14 +594,14 @@
 										<button
 											type="button"
 											class="w-full bg-blue-100 text-blue-800 hover:bg-blue-200 font-semibold px-2 py-1 rounded-md"
-											on:click={() => copyToNecesare(piesa)}>+</button
+											onclick={() => copyToNecesare(piesa)}>+</button
 										>
 									</td>
 									<td class="border border-gray-300 p-1">
 										<button
 											type="button"
 											class="w-full bg-red-100 text-red-800 hover:bg-red-200 font-semibold px-2 py-1 rounded-md"
-											on:click={() => removePiesaInlocuita(i)}>X</button
+											onclick={() => removePiesaInlocuita(i)}>X</button
 										>
 									</td>
 								</tr>
@@ -617,7 +611,7 @@
 					<button
 						type="button"
 						class="bg-green-100 text-green-800 hover:bg-green-200 font-semibold px-2 py-1 rounded-md mt-2"
-						on:click={addPiesaInlocuita}>+ Adauga piesa</button
+						onclick={addPiesaInlocuita}>+ Adauga piesa</button
 					>
 				</div>
 
@@ -640,9 +634,9 @@
 											type="text"
 											bind:value={piesa.pn}
 											class={inputClassTable}
-																																	on:blur={() => setTimeout(() => (showPieseSugestii = false), 200)}
-																																	on:input={(e) => handlePieseInput(e, i, 'necesare')}
-																																	on:focus={() => {
+																																	onblur={() => setTimeout(() => (showPieseSugestii = false), 200)}
+																																	oninput={(e) => handlePieseInput(e, i, 'necesare')}
+																																	onfocus={() => {
 																																		activePieseIndex = i;
 																																		activePieseTip = 'necesare';
 																																		showPieseSugestii = true;
@@ -652,22 +646,21 @@
 										                                                class="absolute top-full left-0 bg-white border border-gray-300 shadow-lg z-20 max-h-52 overflow-y-auto w-[300px]"
 										                                            >
 										                                                {#each pieseSugestii as sugestie (sugestie.pn)}
-										                                                    <div
-										                                                        role="button"
-										                                                        tabindex="0"
-										                                                        class="px-3 py-2 cursor-pointer hover:bg-gray-100"
-										                                                        on:mousedown={() => selectPiesa(sugestie)}
-										                                                    >
-										                                                        <strong class="font-medium">{sugestie.pn}</strong> - {sugestie.descriere}
-										                                                    </div>
-										                                                {/each}
+										                                                                                                        <div
+										                                                                                                            role="button"
+										                                                                                                            tabindex="0"
+										                                                                                                            class="px-3 py-2 cursor-pointer hover:bg-gray-100"
+										                                                                                                            onmousedown={() => selectPiesa(sugestie)}
+										                                                                                                        >
+										                                                                                                            <strong class="font-medium">{sugestie.pn}</strong> - {sugestie.descriere}
+										                                                                                                        </div>										                                                {/each}
 										                                            </ul>
 										                                        {/if}									</td>
 									<td class="border border-gray-300 p-1 relative">
 										<input type="text" bind:value={piesa.descriere} class={inputClassTable} 
-                                                                                on:input={(e) => handleDescriereInput(e, i, 'necesare')}
-                                                                                on:blur={() => setTimeout(() => (showDescriereSugestii = false), 200)}
-                                                                                on:focus={() => { 
+                                                                                oninput={(e) => handleDescriereInput(e, i, 'necesare')}
+                                                                                onblur={() => setTimeout(() => (showDescriereSugestii = false), 200)}
+                                                                                onfocus={() => { 
                                                                                     showDescriereSugestii = true; 
                                                                                     activeDescriereIndex = i;
                                                                                     activeDescriereTip = 'necesare';
@@ -677,17 +670,16 @@
                                             <ul
                                                 class="absolute top-full left-0 bg-white border border-gray-300 shadow-lg z-20 max-h-52 overflow-y-auto w-[300px]"
                                             >
-                                                {#each descriereSugestii as sugestie (sugestie.pn)}
-                                                    <div
-                                                        role="button"
-                                                        tabindex="0"
-                                                        class="px-3 py-2 cursor-pointer hover:bg-gray-100"
-                                                        on:mousedown={() => selectDescriere(sugestie)}
-                                                    >
-                                                        <strong class="font-medium">{sugestie.pn}</strong> - {sugestie.descriere}
-                                                    </div>
-                                                {/each}
-                                            </ul>
+                                                                 {#each pieseSugestii as sugestie (sugestie.pn)}
+                                                                    <div
+                                                                        role="button"
+                                                                        tabindex="0"
+                                                                        class="px-3 py-2 cursor-pointer hover:bg-gray-100"
+                                                                        onmousedown={() => selectDescriere(sugestie)}
+                                                                    >
+                                                                        <strong class="font-medium">{sugestie.pn}</strong> - {sugestie.descriere}
+                                                                    </div>
+                                                                {/each}                                            </ul>
                                         {/if}
 									</td>
 									<td class="border border-gray-300 p-1">
@@ -697,7 +689,7 @@
 										<button
 											type="button"
 											class="w-full bg-red-100 text-red-800 hover:bg-red-200 font-semibold px-2 py-1 rounded-md"
-											on:click={() => removePiesaNecesara(i)}>X</button
+											onclick={() => removePiesaNecesara(i)}>X</button
 										>
 									</td>
 								</tr>
@@ -707,7 +699,7 @@
 					<button
 						type="button"
 						class="bg-green-100 text-green-800 hover:bg-green-200 font-semibold px-2 py-1 rounded-md mt-2"
-						on:click={addPiesaNecesara}>+ Adauga piesa</button
+						onclick={addPiesaNecesara}>+ Adauga piesa</button
 					>
 				</div>
 
@@ -769,8 +761,7 @@
 
 	{#if showClientPopup}
 		<div transition:fly={{ y: -10, duration: 300 }}>
-		    <ClientPopup on:close={() => showClientPopup = false} on:clientSaved={(e) => {
-		        raport.client = e.detail.nume;
+		                        <ClientPopup on:close={() => { showClientPopup = false; }} on:clientSaved={(e) => {		        raport.client = e.detail.nume;
 		        raport.client_id = e.detail.client_id;
 		        showClientPopup = false;
 		    }} />
@@ -780,7 +771,7 @@
 		{#if showReportHistory}
 		<div transition:fly={{ y: -10, duration: 300 }}>
 		    <ReportHistory 
-		        on:close={() => showReportHistory = false}
+		        on:close={() => { showReportHistory = false; }}
 		                on:edit={async (e) => {
 		                    const raportId = e.detail;
 		                    const res = await fetch(`${API_BASE_URL}/raport/${raportId}`);

@@ -87,7 +87,8 @@
         }
     }
 
-    async function updateCompanie() {
+    async function updateCompanie(event: Event) {
+        event.preventDefault();
         updateCompanieMessage = 'Se actualizeaza datele companiei...';
         updateCompanieStatus = 'idle';
         try {
@@ -145,7 +146,7 @@
 
     <div class="mt-8 p-4 border border-yellow-200 bg-yellow-50 rounded-md">
         <h2 class="text-xl font-semibold mb-3">Date Companie</h2>
-        <form onsubmit|preventDefault={updateCompanie}>
+        <form onsubmit={updateCompanie}>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="flex flex-col">
                     <label for="nume" class="font-bold text-sm mb-1 text-gray-700">Nume</label>
