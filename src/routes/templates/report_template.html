@@ -139,10 +139,6 @@
             font-size: 11px;
         }
 
-        .client-data {
-            width: 100%;
-        }
-
         /* Casetă de text (Solicitare, Operatii) */
         .form-text-box {
             border: 1px solid #999;
@@ -280,7 +276,7 @@
                 <td class="left-col">
                     <div class="form-section">
                         <span class="form-label">Client:</span>
-                        <div class="form-data-line client-data">{{ raport.client_nume_text }}</div>
+                        <div class="form-data-line">{{ raport.client_nume_text }}</div>
                     </div>
 
                     <div class="form-section">
@@ -308,18 +304,6 @@
                             {{ raport.observatii | default('', true) }} {# Am adăugat acest câmp din imagine #}
                         </div>
                     </div>
-                    <div class="form-section" style="margin-top: 20px;">
-                        <table class="summary-table">
-                            <tr>
-                                <td class="label">Manopera (ore)</td>
-                                <td>{{ raport.manopera_ore }}</td>
-                            </tr>
-                            <tr>
-                                <td class="label">Km efectuati</td>
-                                <td>{{ raport.km_efectuati }}</td>
-                            </tr>
-                        </table>
-                   </div>
                 </td>
 
                 <td class="right-col">
@@ -383,6 +367,18 @@
                             </tbody>
                         </table>
                     </div>
+                    <div class="form-section" style="margin-top: 20px;">
+                        <table class="summary-table">
+                            <tr>
+                                <td class="label">Manopera (ore)</td>
+                                <td>{{ raport.manopera_ore }}</td>
+                            </tr>
+                            <tr>
+                                <td class="label">Km efectuati</td>
+                                <td>{{ raport.km_efectuati }}</td>
+                            </tr>
+                        </table>
+                   </div>
                 </td>
             </tr>
         </table>
