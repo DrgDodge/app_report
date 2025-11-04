@@ -28,8 +28,16 @@
         }
 
         .header-table .header-left {
-            width: 70%;
+            width: 50%;
             vertical-align: top;
+        }
+
+        .header-table .header-center {
+            width: 20%;
+            vertical-align: top;
+            text-align: left;
+            font-size: 9px;
+            padding-left: 10px;
         }
 
         .header-table .header-right {
@@ -68,10 +76,10 @@
         }
 
         .checkbox-item {
-            display: inline-block;
-            margin-right: 15px;
+            display: block;
             font-size: 10px;
             font-weight: bold;
+            padding: 2px 0;
         }
 
         .checkbox-box {
@@ -221,21 +229,40 @@
                     </div>
 
                     <div class="checkbox-group">
-                        <span class="checkbox-item">
-                            <span class="checkbox-box">{% if 'Revizie' in tip_raport %}X{% else %}&nbsp;{% endif %}</span> REVIZIE
-                        </span>
-                        <span class="checkbox-item">
-                            <span class="checkbox-box">{% if 'Reparatie' in tip_raport %}X{% else %}&nbsp;{% endif %}</span> REPARATIE
-                        </span>
-                        <span class="checkbox-item">
-                            <span class="checkbox-box">{% if 'Constatare' in tip_raport %}X{% else %}&nbsp;{% endif %}</span> CONSTATARE
-                        </span>
-                        <span class="checkbox-item">
-                            <span class="checkbox-box">{% if 'Garantie' in tip_raport %}X{% else %}&nbsp;{% endif %}</span> GARANTIE
-                        </span>
+                        <table>
+                            <tr>
+                                <td>
+                                    <span class="checkbox-item">
+                                        <span class="checkbox-box">{% if 'REVIZIE' in tip_raport %}X{% else %}&nbsp;{% endif %}</span> REVIZIE
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="checkbox-item">
+                                        <span class="checkbox-box">{% if 'REPARATIE' in tip_raport %}X{% else %}&nbsp;{% endif %}</span> REPARATIE
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span class="checkbox-item">
+                                        <span class="checkbox-box">{% if 'CONSTATARE' in tip_raport %}X{% else %}&nbsp;{% endif %}</span> CONSTATARE
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="checkbox-item">
+                                        <span class="checkbox-box">{% if 'GARANTIE' in tip_raport %}X{% else %}&nbsp;{% endif %}</span> GARANTIE
+                                    </span>
+                                </td>
+                            </tr>
+                        </table>
                     </div>
                 </td>
-                
+                <td class="header-center">
+                    <strong>{{ companie.nume }}</strong><br>
+                    {{ companie.adresa }}<br>
+                    Email: {{ companie.email }}<br>
+                    Tel: {{ companie.telefon }}
+                </td>
                 <td class="header-right">
                     {% if logo_data_uri %}
                     <img src="{{ logo_data_uri }}" alt="Logo" class="logo">
