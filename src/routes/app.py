@@ -382,7 +382,7 @@ def create_client():
         cursor.execute("""
             INSERT INTO Clienti (nume, cui, nr_reg_com, iban, adresa, locatie)
             VALUES (?, ?, ?, ?, ?, ?)
-        """, (data.get('nume'), data.get('cui'), data.get('nr_reg_com'), data.get('iban'), data.get('adresa'), data.get('locatie'))))
+        """, (data.get('nume'), data.get('cui'), data.get('nr_reg_com'), data.get('iban'), data.get('adresa'), data.get('locatie')))
         client_id = cursor.lastrowid
         conn.commit()
         return jsonify({"success": True, "client_id": client_id, "message": "Client created successfully"}), 201
