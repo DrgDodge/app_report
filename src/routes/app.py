@@ -306,10 +306,16 @@ def get_report_pdf(raport_id):
         with open(template_path, 'r', encoding='utf-8') as f:
             template_str = f.read()
 
-        # Make logo path absolute
+        # Proceseaza logo-ul
+        logo_data_uri = None
         if companie.get('logo'):
-            logo_path = os.path.join(os.path.dirname(__file__), '..', 'static', companie['logo'])
-            companie['logo'] = logo_path
+            logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'static', companie['logo'])
+            if os.path.exists(logo_path):
+                import base64
+                with open(logo_path, "rb") as image_file:
+                    encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
+                file_extension = os.path.splitext(companie['logo'])[1][1:]
+                logo_data_uri = f"data:image/{file_extension};base64,{encoded_string}"
 
         # Randare HTML cu date
         html_rendered = render_template_string(
@@ -318,11 +324,13 @@ def get_report_pdf(raport_id):
             piese_inlocuite=piese_inlocuite, 
             piese_necesare=piese_necesare,
             companie=companie,
-            tip_raport=tip_raport_str
+            tip_raport=tip_raport_str,
+            logo_data_uri=logo_data_uri
         )
 
         # Genereaza PDF
-        pdf_bytes = HTML(string=html_rendered).write_pdf()
+        pdf_bytes = HTML(string=html_rendered, base_url=os.path.dirname(os.path.abspath(__file__))).write_pdf()
+
 
         # 3. Returneaza PDF-ul
         return Response(

@@ -237,8 +237,8 @@
                 </td>
                 
                 <td class="header-right">
-                    {% if companie.logo %}
-                    <img src="{{ url_for('static', filename=companie.logo) }}" alt="Logo" class="logo">
+                    {% if logo_data_uri %}
+                    <img src="{{ logo_data_uri }}" alt="Logo" class="logo">
                     {% endif %}
                 </td>
             </tr>
