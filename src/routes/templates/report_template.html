@@ -28,22 +28,22 @@
         }
 
         .header-table .header-left {
-            width: 50%;
+            width: 45%;
+            vertical-align: top;
+        }
+
+        .header-table .header-right {
+            width: 25%;
+            text-align: right;
             vertical-align: top;
         }
 
         .header-table .header-center {
-            width: 20%;
+            width: 30%;
             vertical-align: top;
             text-align: left;
             font-size: 9px;
             padding-left: 10px;
-        }
-
-        .header-table .header-right {
-            width: 30%;
-            text-align: right;
-            vertical-align: top;
         }
 
         .report-title {
@@ -105,18 +105,29 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 15px;
+            height: calc(100vh - 200px); /* Adjust height for main content */
+        }
+
+        .main-layout-table .left-col,
+        .main-layout-table .right-col {
+            vertical-align: top;
+            padding-right: 10px;
+            height: 100%;
         }
 
         .main-layout-table .left-col {
             width: 60%;
-            vertical-align: top;
-            padding-right: 10px;
         }
 
         .main-layout-table .right-col {
             width: 40%;
-            vertical-align: top;
             padding-left: 10px;
+            display: flex; /* Use flexbox for right column */
+            flex-direction: column;
+        }
+
+        .right-col-content {
+            flex-grow: 1; /* This section will take up available space */
         }
 
         .form-section {
@@ -257,16 +268,16 @@
                         </table>
                     </div>
                 </td>
+                <td class="header-right">
+                    {% if logo_data_uri %}
+                    <img src="{{ logo_data_uri }}" alt="Logo" class="logo">
+                    {% endif %}
+                </td>
                 <td class="header-center">
                     <strong>{{ companie.nume }}</strong><br>
                     {{ companie.adresa }}<br>
                     Email: {{ companie.email }}<br>
                     Tel: {{ companie.telefon }}
-                </td>
-                <td class="header-right">
-                    {% if logo_data_uri %}
-                    <img src="{{ logo_data_uri }}" alt="Logo" class="logo">
-                    {% endif %}
                 </td>
             </tr>
         </table>
@@ -307,65 +318,67 @@
                 </td>
 
                 <td class="right-col">
-                    <div class="form-section">
-                        <span class="form-label">Utilaj:</span>
-                        <div class="form-data-line">{{ raport.utilaj }}</div>
-                    </div>
-                    
-                    <div class="form-section">
-                        <span class="form-label">Serie:</span>
-                        <div class="form-data-line">{{ raport.serie_utilaj }}</div>
-                    </div>
+                    <div class="right-col-content">
+                        <div class="form-section">
+                            <span class="form-label">Utilaj:</span>
+                            <div class="form-data-line">{{ raport.utilaj }}</div>
+                        </div>
+                        
+                        <div class="form-section">
+                            <span class="form-label">Serie:</span>
+                            <div class="form-data-line">{{ raport.serie_utilaj }}</div>
+                        </div>
 
-                    <div class="form-section">
-                        <span class="form-label">Ore funct:</span>
-                        <div class="form-data-line">{{ raport.ore_funct }}</div>
-                    </div>
-                    
-                    <hr style="border: 0; border-top: 1px solid #ccc; margin: 15px 0;">
+                        <div class="form-section">
+                            <span class="form-label">Ore funct:</span>
+                            <div class="form-data-line">{{ raport.ore_funct }}</div>
+                        </div>
+                        
+                        <hr style="border: 0; border-top: 1px solid #ccc; margin: 15px 0;">
 
-                    <div class="form-section">
-                        <span class="form-label">Piese inlocuite:</span>
-                        <table class="parts-table">
-                            <thead>
-                                <tr>
-                                    <th class="col-pn">P/N</th>
-                                    <th class="col-desc">Descriere</th>
-                                    <th class="col-buc">Buc</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for piesa in piese_inlocuite %}
-                                <tr>
-                                    <td>{{ piesa.pn }}</td>
-                                    <td>{{ piesa.descriere }}</td>
-                                    <td style="text-align: center;">{{ piesa.buc }}</td>
-                                </tr>
-                                {% endfor %}
+                        <div class="form-section">
+                            <span class="form-label">Piese inlocuite:</span>
+                            <table class="parts-table">
+                                <thead>
+                                    <tr>
+                                        <th class="col-pn">P/N</th>
+                                        <th class="col-desc">Descriere</th>
+                                        <th class="col-buc">Buc</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for piesa in piese_inlocuite %}
+                                    <tr>
+                                        <td>{{ piesa.pn }}</td>
+                                        <td>{{ piesa.descriere }}</td>
+                                        <td style="text-align: center;">{{ piesa.buc }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                    </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="form-section" style="margin-top: 20px;">
+                            <span class="form-label">Necesar piese:</span>
+                            <table class="parts-table">
+                                <thead>
+                                    <tr>
+                                        <th class="col-pn">P/N</th>
+                                        <th class="col-desc">Descriere</th>
+                                        <th class="col-buc">Buc</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for piesa in piese_necesare %}
+                                    <tr>
+                                        <td>{{ piesa.pn }}</td>
+                                        <td>{{ piesa.descriere }}</td>
+                                        <td style="text-align: center;">{{ piesa.buc }}</td>
+                                    </tr>
+                                    {% endfor %}
                                 </tbody>
-                        </table>
-                    </div>
-                    
-                    <div class="form-section" style="margin-top: 20px;">
-                        <span class="form-label">Necesar piese:</span>
-                        <table class="parts-table">
-                            <thead>
-                                <tr>
-                                    <th class="col-pn">P/N</th>
-                                    <th class="col-desc">Descriere</th>
-                                    <th class="col-buc">Buc</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for piesa in piese_necesare %}
-                                <tr>
-                                    <td>{{ piesa.pn }}</td>
-                                    <td>{{ piesa.descriere }}</td>
-                                    <td style="text-align: center;">{{ piesa.buc }}</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                            </table>
+                        </div>
                     </div>
 
                     <div class="form-section" style="margin-top: 20px;">
