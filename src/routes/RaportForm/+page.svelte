@@ -464,7 +464,7 @@
 							id="utilaj"
 							bind:value={raport.utilaj}
 							class={inputClass}
-															oninput={handleUtilajInput}						onblur={() => setTimeout(() => (showUtilajSugestii = false), 500)}
+															oninput={handleUtilajInput}						onblur={() => setTimeout(() => (showUtilajSugestii = false), 200)}
 								onfocus={() => {
 									showUtilajSugestii = true;
 								}}
@@ -476,14 +476,15 @@
 									transition:fly={{ y: -5, duration: 200 }}
 								>
 									{#each utilajSugestii as sugestie (sugestie)}
-										<div
-																					role="button"
-																					tabindex="0"
-																					class="px-3 py-2 cursor-pointer hover:bg-gray-100"
-																					onmousedown={() => selectUtilaj(sugestie)}
+										           <li>
+																				<button
+																					type="button"
+																					class="w-full text-left px-3 py-2 cursor-pointer hover:bg-gray-100"
+																					onclick={() => selectUtilaj(sugestie)}
 																				>
 																					{sugestie}
-																				</div>									{/each}
+																				</button>
+																			</li>									{/each}
 									</ul>
 								{/if}
 						</div>
