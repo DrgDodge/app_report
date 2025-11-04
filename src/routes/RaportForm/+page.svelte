@@ -9,29 +9,29 @@
 		buc: number | null;
 	}
 
-	interface Raport {
-		numar: string;
-		tehnician: string;
-		data: string;
-		este_revizie: boolean;
-		este_reparatie: boolean;
-		este_constatare: boolean;
-		este_garantie: boolean;
-		client: string; // Numele clientului (text)
-		        client_id: number | null; // ID-ul clientului (din DB)
-		        cui: string;
-        adresa: string;		locatie: string;
-		solicitare_client: string;
-		utilaj: string;
-		serie: string;
-		ore_funct: number | null;
-		operatii_efectuate: string;
-		observatii: string;
-		manopera_ore: number | null;
-		km_efectuati: number | null;
-		nume_semnatura_client: string;
-	}
-
+	    interface Raport {
+			numar: string;
+			tehnician: string;
+			data: string;
+			este_revizie: boolean;
+			este_reparatie: boolean;
+			este_constatare: boolean;
+			este_garantie: boolean;
+			client: string; // Numele clientului (text)
+			client_id: number | null; // ID-ul clientului (din DB)
+			cui: string;
+			adresa: string;
+			locatie: string;
+			solicitare_client: string;
+			utilaj: string;
+			serie: string;
+			ore_funct: number | null;
+			operatii_efectuate: string;
+			observatii: string;
+			manopera_ore: number | null;
+			km_efectuati: number | null;
+			nume_semnatura_client: string;
+		}
 	interface ClientSugestie {
 		id: number;
 		nume: string;
@@ -55,9 +55,10 @@
 		este_constatare: false,
 		este_garantie: false,
 		client: '',
-		        client_id: null, // ID-ul clientului (din DB)
-		        cui: '',
-        adresa: '',		locatie: '',
+		client_id: null, // ID-ul clientului (din DB)
+		cui: '',
+		adresa: '',
+		locatie: '',
 		solicitare_client: '',
 		utilaj: '',
 		serie: '',
@@ -78,8 +79,8 @@
 	let pieseSugestii = $state<PiesaSugestie[]>([]);
 	let showClientSugestii = $state(false);
 	let showUtilajSugestii = $state(false);
-	let showSerieSugestii = $state(false);
-	let showPieseSugestii = $state(false);
+	    let showSerieSugestii = $state(false);
+	    let showUtilajeList = $state(false);	let showPieseSugestii = $state(false);
 	let activePieseIndex = $state<number | null>(null); // Tine minte pt ce rand cautam piese
 	let activePieseTip = $state<'inlocuite' | 'necesare'>('inlocuite');
 
@@ -442,36 +443,60 @@
 				</div>
 			</div>
 			<div class="flex flex-col gap-4">
-				<div class="relative flex flex-col">
-					<label for="utilaj" class="font-bold text-sm mb-1 text-gray-700">Utilaj</label>
-					<input
-						type="text"
-						id="utilaj"
-						bind:value={raport.utilaj}
-						class={inputClass}
-													oninput={handleUtilajInput}						onblur={() => setTimeout(() => (showUtilajSugestii = false), 200)}
-						onfocus={() => {
-							showUtilajSugestii = true;
-						}}
-						autocomplete="off"
-					/>
-					{#if showUtilajSugestii && utilajSugestii.length > 0}
-						<ul
-							class="absolute top-full left-0 right-0 bg-white border border-gray-300 border-t-0 rounded-b-md shadow-lg z-10 max-h-52 overflow-y-auto"
-							transition:fly={{ y: -5, duration: 200 }}
-						>
-							{#each utilajSugestii as sugestie (sugestie)}
-								<div
-									role="button"
-									tabindex="0"
-									class="px-3 py-2 cursor-pointer hover:bg-gray-100"
-																							onmousedown={() => selectUtilaj(sugestie)}
-																							>
-																								{sugestie}
-																							</div>							{/each}
+	<div class="relative flex items-end gap-2">
+					<div class="flex-grow flex flex-col">
+						<label for="utilaj" class="font-bold text-sm mb-1 text-gray-700">Utilaj</label>
+						<input
+							type="text"
+							id="utilaj"
+							bind:value={raport.utilaj}
+							class={inputClass}
+															oninput={handleUtilajInput}						onblur={() => setTimeout(() => (showUtilajSugestii = false), 200)}
+								onfocus={() => {
+									showUtilajSugestii = true;
+								}}
+								autocomplete="off"
+							/>
+							{#if showUtilajSugestii && utilajSugestii.length > 0}
+								<ul
+									class="absolute top-full left-0 right-0 bg-white border border-gray-300 border-t-0 rounded-b-md shadow-lg z-10 max-h-52 overflow-y-auto"
+									transition:fly={{ y: -5, duration: 200 }}
+								>
+									{#each utilajSugestii as sugestie (sugestie)}
+										<div
+											role="button"
+											tabindex="0"
+											class="px-3 py-2 cursor-pointer hover:bg-gray-100"
+																								onmousedown={() => selectUtilaj(sugestie)}
+																								>
+																									{sugestie}
+																								</div>									{/each}
+									</ul>
+								{/if}
+						</div>
+						<button type="button" on:click={async () => {
+							if (raport.client_id) {
+								const res = await fetch(`${API_BASE_URL}/client/${raport.client_id}/utilaje`);
+								if (res.ok) {
+									utilajSugestii = await res.json();
+									showUtilajeList = true;
+								}
+							}
+						}} class="bg-blue-500 text-white p-2 rounded-md">...</button>
+					</div>
+					{#if showUtilajeList}
+						<ul class="absolute top-full left-0 right-0 bg-white border border-gray-300 border-t-0 rounded-b-md shadow-lg z-10 max-h-52 overflow-y-auto">
+							{#each utilajSugestii as utilaj (utilaj.id)}
+								<div role="button" tabindex="0" class="px-3 py-2 cursor-pointer hover:bg-gray-100" on:mousedown={() => {
+									raport.utilaj = utilaj.nume;
+									raport.serie = utilaj.serie;
+									showUtilajeList = false;
+								}}>
+									{utilaj.nume} - {utilaj.serie}
+								</div>
+							{/each}
 						</ul>
 					{/if}
-				</div>
 				<div class="relative flex flex-col">
 					<label for="serie" class="font-bold text-sm mb-1 text-gray-700">Serie</label>
 					<input

@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onMount } from 'svelte';
-    import ClientDetails from './ClientDetails.svelte';
+    import ClientDetailsPopup from './ClientDetailsPopup.svelte';
 
     let clients = [];
     let parts = [];
@@ -44,7 +44,5 @@
 </div>
 
 {#if selectedClientDetails}
-    <div class="mt-8">
-        <ClientDetails clientDetails={selectedClientDetails} />
-    </div>
+    <ClientDetailsPopup clientDetails={selectedClientDetails} on:close={() => selectedClientDetails = null} />
 {/if}

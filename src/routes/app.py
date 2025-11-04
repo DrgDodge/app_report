@@ -543,6 +543,25 @@ def get_parts():
     conn.close()
     return jsonify(piese)
 
+@app.route('/api/part/<int:part_id>', methods=['PUT'])
+def update_part(part_id):
+    data = request.json
+    conn = get_db_conn()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            UPDATE PieseMaster SET
+                pn = ?, descriere = ?
+            WHERE id = ?
+        """, (data.get('pn'), data.get('descriere'), part_id))
+        conn.commit()
+        return jsonify({"success": True, "message": "Piesa actualizata cu succes"}), 200
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"success": False, "message": str(e)}), 500
+    finally:
+        conn.close()
+
 @app.route('/api/raport/<int:raport_id>', methods=['DELETE'])
 def delete_raport(raport_id):
     conn = get_db_conn()
