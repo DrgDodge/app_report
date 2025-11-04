@@ -803,7 +803,7 @@
 	{#if showClientPopup}
 		<div transition:fly={{ y: -10, duration: 300 }}>
 		                        <ClientPopup on:close={() => { showClientPopup = false; }} on:clientSaved={(e) => {		        raport.client = e.detail.nume;
-		        raport.client_id = e.detail.client_id;
+		        raport.client_id = e.detail.id;
 		        raport.locatie = e.detail.locatie;
 		        raport.cui = e.detail.cui;
 		        showClientPopup = false;

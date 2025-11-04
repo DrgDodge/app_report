@@ -341,8 +341,8 @@ def search_utilaje():
         
     conn = get_db_conn()
     cursor = conn.cursor()
-    cursor.execute("SELECT DISTINCT utilaj FROM Rapoarte WHERE utilaj LIKE ? LIMIT 10", (f'%{query}%',))
-    utilaje = [row['utilaj'] for row in cursor.fetchall()]
+    cursor.execute("SELECT DISTINCT nume FROM Utilaje WHERE nume LIKE ? LIMIT 10", (f'%{query}%',))
+    utilaje = [row['nume'] for row in cursor.fetchall()]
     conn.close()
     return jsonify(utilaje)
 
@@ -401,7 +401,11 @@ def create_client():
         """, (data.get('nume'), data.get('cui'), data.get('nr_reg_com'), data.get('iban'), data.get('adresa'), data.get('locatie')))
         client_id = cursor.lastrowid
         conn.commit()
-        return jsonify({"success": True, "client_id": client_id, "message": "Client created successfully"}), 201
+        
+        cursor.execute("SELECT * FROM Clienti WHERE id = ?", (client_id,))
+        new_client_data = cursor.fetchone()
+        
+        return jsonify(dict(new_client_data)), 201
     except Exception as e:
         conn.rollback()
         return jsonify({"success": False, "message": str(e)}), 500
