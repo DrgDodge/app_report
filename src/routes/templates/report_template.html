@@ -35,12 +35,12 @@
         .header-table .header-right {
             width: 25%;
             text-align: right;
-            vertical-align: top;
+            vertical-align: middle;
         }
 
         .header-table .header-center {
             width: 30%;
-            vertical-align: top;
+            vertical-align: middle;
             text-align: left;
             font-size: 9px;
             padding-left: 10px;
@@ -105,29 +105,18 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 15px;
-            height: calc(100vh - 200px); /* Adjust height for main content */
-        }
-
-        .main-layout-table .left-col,
-        .main-layout-table .right-col {
-            vertical-align: top;
-            padding-right: 10px;
-            height: 100%;
         }
 
         .main-layout-table .left-col {
-            width: 60%;
+            width: 50%;
+            vertical-align: top;
+            padding-right: 10px;
         }
 
         .main-layout-table .right-col {
-            width: 40%;
+            width: 50%;
+            vertical-align: top;
             padding-left: 10px;
-            display: flex; /* Use flexbox for right column */
-            flex-direction: column;
-        }
-
-        .right-col-content {
-            flex-grow: 1; /* This section will take up available space */
         }
 
         .form-section {
@@ -148,6 +137,10 @@
             padding: 3px 2px;
             min-height: 14px;
             font-size: 11px;
+        }
+
+        .client-data {
+            width: 100%;
         }
 
         /* Casetă de text (Solicitare, Operatii) */
@@ -287,7 +280,7 @@
                 <td class="left-col">
                     <div class="form-section">
                         <span class="form-label">Client:</span>
-                        <div class="form-data-line">{{ raport.client_nume_text }}</div>
+                        <div class="form-data-line client-data">{{ raport.client_nume_text }}</div>
                     </div>
 
                     <div class="form-section">
@@ -315,85 +308,81 @@
                             {{ raport.observatii | default('', true) }} {# Am adăugat acest câmp din imagine #}
                         </div>
                     </div>
+                    <div class="form-section" style="margin-top: 20px;">
+                        <table class="summary-table">
+                            <tr>
+                                <td class="label">Manopera (ore)</td>
+                                <td>{{ raport.manopera_ore }}</td>
+                            </tr>
+                            <tr>
+                                <td class="label">Km efectuati</td>
+                                <td>{{ raport.km_efectuati }}</td>
+                            </tr>
+                        </table>
+                   </div>
                 </td>
 
                 <td class="right-col">
-                    <div class="right-col-content">
-                        <div class="form-section">
-                            <span class="form-label">Utilaj:</span>
-                            <div class="form-data-line">{{ raport.utilaj }}</div>
-                        </div>
-                        
-                        <div class="form-section">
-                            <span class="form-label">Serie:</span>
-                            <div class="form-data-line">{{ raport.serie_utilaj }}</div>
-                        </div>
+                    <div class="form-section">
+                        <span class="form-label">Utilaj:</span>
+                        <div class="form-data-line">{{ raport.utilaj }}</div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <span class="form-label">Serie:</span>
+                        <div class="form-data-line">{{ raport.serie_utilaj }}</div>
+                    </div>
 
-                        <div class="form-section">
-                            <span class="form-label">Ore funct:</span>
-                            <div class="form-data-line">{{ raport.ore_funct }}</div>
-                        </div>
-                        
-                        <hr style="border: 0; border-top: 1px solid #ccc; margin: 15px 0;">
+                    <div class="form-section">
+                        <span class="form-label">Ore funct:</span>
+                        <div class="form-data-line">{{ raport.ore_funct }}</div>
+                    </div>
+                    
+                    <hr style="border: 0; border-top: 1px solid #ccc; margin: 15px 0;">
 
-                        <div class="form-section">
-                            <span class="form-label">Piese inlocuite:</span>
-                            <table class="parts-table">
-                                <thead>
-                                    <tr>
-                                        <th class="col-pn">P/N</th>
-                                        <th class="col-desc">Descriere</th>
-                                        <th class="col-buc">Buc</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for piesa in piese_inlocuite %}
-                                    <tr>
-                                        <td>{{ piesa.pn }}</td>
-                                        <td>{{ piesa.descriere }}</td>
-                                        <td style="text-align: center;">{{ piesa.buc }}</td>
-                                    </tr>
-                                    {% endfor %}
-                                    </tbody>
-                            </table>
-                        </div>
-                        
-                        <div class="form-section" style="margin-top: 20px;">
-                            <span class="form-label">Necesar piese:</span>
-                            <table class="parts-table">
-                                <thead>
-                                    <tr>
-                                        <th class="col-pn">P/N</th>
-                                        <th class="col-desc">Descriere</th>
-                                        <th class="col-buc">Buc</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for piesa in piese_necesare %}
-                                    <tr>
-                                        <td>{{ piesa.pn }}</td>
-                                        <td>{{ piesa.descriere }}</td>
-                                        <td style="text-align: center;">{{ piesa.buc }}</td>
-                                    </tr>
-                                    {% endfor %}
+                    <div class="form-section">
+                        <span class="form-label">Piese inlocuite:</span>
+                        <table class="parts-table">
+                            <thead>
+                                <tr>
+                                    <th class="col-pn">P/N</th>
+                                    <th class="col-desc">Descriere</th>
+                                    <th class="col-buc">Buc</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for piesa in piese_inlocuite %}
+                                <tr>
+                                    <td>{{ piesa.pn }}</td>
+                                    <td>{{ piesa.descriere }}</td>
+                                    <td style="text-align: center;">{{ piesa.buc }}</td>
+                                </tr>
+                                {% endfor %}
                                 </tbody>
-                            </table>
-                        </div>
+                        </table>
                     </div>
-
+                    
                     <div class="form-section" style="margin-top: 20px;">
-                         <table class="summary-table">
-                             <tr>
-                                 <td class="label">Manopera (ore)</td>
-                                 <td>{{ raport.manopera_ore }}</td>
-                             </tr>
-                             <tr>
-                                 <td class="label">Km efectuati</td>
-                                 <td>{{ raport.km_efectuati }}</td>
-                             </tr>
-                         </table>
+                        <span class="form-label">Necesar piese:</span>
+                        <table class="parts-table">
+                            <thead>
+                                <tr>
+                                    <th class="col-pn">P/N</th>
+                                    <th class="col-desc">Descriere</th>
+                                    <th class="col-buc">Buc</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for piesa in piese_necesare %}
+                                <tr>
+                                    <td>{{ piesa.pn }}</td>
+                                    <td>{{ piesa.descriere }}</td>
+                                    <td style="text-align: center;">{{ piesa.buc }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
-
                 </td>
             </tr>
         </table>
