@@ -204,16 +204,10 @@
 		}, 300);
 	}
 
-	function selectUtilaj(sugestie: UtilajSugestie | string) {
-		if (typeof sugestie === 'string') {
-			raport.utilaj = sugestie;
-		} else {
-			raport.utilaj = sugestie.nume;
-			raport.serie = sugestie.serie;
-		}
+	function selectUtilaj(sugestie: string) {
+		raport.utilaj = sugestie;
 		utilajSugestii = [];
 		showUtilajSugestii = false;
-		showClientUtilaje = false;
 	}
 
 	let serieDebounceTimer: number;
@@ -500,7 +494,11 @@
 					{#if showClientUtilaje}
 						<ul class="absolute top-full left-0 right-0 bg-white border border-gray-300 border-t-0 rounded-b-md shadow-lg z-10 max-h-52 overflow-y-auto">
 							{#each clientUtilaje as utilaj (utilaj.id)}
-								<div role="button" tabindex="0" class="px-3 py-2 cursor-pointer hover:bg-gray-100" onmousedown={() => selectUtilaj(utilaj)}>
+								<div role="button" tabindex="0" class="px-3 py-2 cursor-pointer hover:bg-gray-100" onmousedown={() => {
+									raport.utilaj = utilaj.nume;
+									raport.serie = utilaj.serie;
+									showClientUtilaje = false;
+								}}>
 									{utilaj.nume} - {utilaj.serie}
 								</div>
 							{/each}
