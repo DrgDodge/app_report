@@ -231,12 +231,14 @@ def create_raport():
                 """, (raport_id, piesa.get('pn'), piesa.get('descriere'), piesa.get('buc'))) 
         # Pas 5: Salveaza istoricul orelor de functionare
         if raport.get('utilaj') and raport.get('serie') and client_id:
-            cursor.execute("SELECT id FROM Utilaje WHERE nume = ? AND serie = ? AND client_id = ?", (raport.get('utilaj'), raport.get('serie'), client_id))
+            # Ensure client_id is an integer
+            client_id_int = int(client_id)
+            cursor.execute("SELECT id FROM Utilaje WHERE nume = ? AND serie = ? AND client_id = ?", (raport.get('utilaj'), raport.get('serie'), client_id_int))
             utilaj_row = cursor.fetchone()
             if utilaj_row:
                 utilaj_id = utilaj_row['id']
             else:
-                cursor.execute("INSERT INTO Utilaje (client_id, nume, serie) VALUES (?, ?, ?)", (client_id, raport.get('utilaj'), raport.get('serie')))
+                cursor.execute("INSERT INTO Utilaje (client_id, nume, serie) VALUES (?, ?, ?)", (client_id_int, raport.get('utilaj'), raport.get('serie')))
                 utilaj_id = cursor.lastrowid
 
             if raport.get('ore_funct'):
