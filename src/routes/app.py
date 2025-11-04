@@ -102,10 +102,11 @@ def get_client_details(client_id):
     conn = get_db_conn()
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT locatie
-        FROM Rapoarte 
-        WHERE client_id = ? 
-        ORDER BY id DESC 
+        SELECT c.cui, c.adresa, r.locatie
+        FROM Clienti c
+        LEFT JOIN Rapoarte r ON c.id = r.client_id
+        WHERE c.id = ?
+        ORDER BY r.id DESC
         LIMIT 1
     """, (client_id,))
     details = cursor.fetchone()
@@ -401,6 +402,28 @@ def get_client_utilaje(client_id):
     conn.close()
     return jsonify(utilaje)
 
+@app.route('/api/client/<int:client_id>/full_details', methods=['GET'])
+def get_client_full_details(client_id):
+    conn = get_db_conn()
+    cursor = conn.cursor()
+
+    # Get client details
+    cursor.execute("SELECT * FROM Clienti WHERE id = ?", (client_id,))
+    client = dict(cursor.fetchone())
+
+    # Get client equipment
+    cursor.execute("SELECT * FROM Utilaje WHERE client_id = ?", (client_id,))
+    utilaje = [dict(row) for row in cursor.fetchall()]
+
+    # Get equipment history
+    for utilaj in utilaje:
+        cursor.execute("SELECT * FROM OreFunctHistory WHERE utilaj_id = ? ORDER BY data DESC", (utilaj['id'],))
+        utilaj['history'] = [dict(row) for row in cursor.fetchall()]
+
+    conn.close()
+
+    return jsonify({'client': client, 'utilaje': utilaje})
+
 @app.route('/api/utilaj/<int:utilaj_id>/history', methods=['GET'])
 def get_utilaj_history(utilaj_id):
     conn = get_db_conn()
@@ -501,6 +524,22 @@ def get_raport(raport_id):
         'pieseInlocuite': piese_inlocuite,
         'pieseNecesare': piese_necesare
     })
+
+@app.route('/api/clients', methods=['GET'])
+def get_clients():
+    conn = get_db_conn()
+    cursor = conn.cursor()
+    conn.close()
+    return jsonify(clienti)
+
+@app.route('/api/parts', methods=['GET'])
+def get_parts():
+    conn = get_db_conn()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM PieseMaster ORDER BY pn")
+    piese = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return jsonify(piese)
 
 @app.route('/api/raport/<int:raport_id>', methods=['DELETE'])
 def delete_raport(raport_id):

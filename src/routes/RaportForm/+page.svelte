@@ -18,8 +18,9 @@
 		este_constatare: boolean;
 		este_garantie: boolean;
 		client: string; // Numele clientului (text)
-		client_id: number | null; // ID-ul clientului (din DB)
-		locatie: string;
+		        client_id: number | null; // ID-ul clientului (din DB)
+		        cui: string;
+        adresa: string;		locatie: string;
 		solicitare_client: string;
 		utilaj: string;
 		serie: string;
@@ -54,8 +55,9 @@
 		este_constatare: false,
 		este_garantie: false,
 		client: '',
-		client_id: null, // ID-ul clientului (din DB)
-		locatie: '',
+		        client_id: null, // ID-ul clientului (din DB)
+		        cui: '',
+        adresa: '',		locatie: '',
 		solicitare_client: '',
 		utilaj: '',
 		serie: '',
@@ -166,6 +168,8 @@
 				if (res.ok) {
 					const details = await res.json();
 					if (details.locatie) raport.locatie = details.locatie;
+					if (details.cui) raport.cui = details.cui;
+					if (details.adresa) raport.adresa = details.adresa;
 					if (details.contact) raport.nume_semnatura_client = details.contact;
 				}
 			} catch (error) {
@@ -385,40 +389,43 @@
 
 		<div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5 border-b border-gray-300 pb-5">
 			<div class="flex flex-col gap-4">
-				<div class="relative flex items-end gap-2">
-					<div class="flex-grow flex flex-col">
-						<label for="client" class="font-bold text-sm mb-1 text-gray-700">Client</label>
-						<input
-							type="text"
-							id="client"
-							bind:value={raport.client}
-							class={inputClass}
-															oninput={handleClientInput}							onblur={() => setTimeout(() => (showClientSugestii = false), 200)}
-								onfocus={() => {
-								showClientSugestii = true;
-							}}
-							autocomplete="off"
-						/>
-						{#if showClientSugestii && clientSugestii.length > 0}
-							<ul
-								class="absolute top-full left-0 right-0 bg-white border border-gray-300 border-t-0 rounded-b-md shadow-lg z-10 max-h-52 overflow-y-auto"
-								transition:fly={{ y: -5, duration: 200 }}
-							>
-								{#each clientSugestii as sugestie (sugestie.id)}
-									<div
-										role="button"
-										tabindex="0"
-										class="px-3 py-2 cursor-pointer hover:bg-gray-100"
-																								onmousedown={() => selectClient(sugestie)}
-																								>
-																									{sugestie.nume}
-																								</div>								{/each}
-							</ul>
-						{/if}
-					</div>
-					<button type="button" onclick={() => showClientPopup = true} class="bg-blue-500 text-white p-2 rounded-md">+</button>
-				</div>
-				<div class="flex flex-col">
+				                <div class="relative flex items-end gap-2">
+									<div class="flex-grow flex flex-col">
+										<label for="client" class="font-bold text-sm mb-1 text-gray-700">Client</label>
+										<input
+											type="text"
+											id="client"
+											bind:value={raport.client}
+											class={inputClass}
+																			oninput={handleClientInput}							onblur={() => setTimeout(() => (showClientSugestii = false), 200)}
+												onfocus={() => {
+												showClientSugestii = true;
+											}}
+											autocomplete="off"
+										/>
+										{#if showClientSugestii && clientSugestii.length > 0}
+											<ul
+												class="absolute top-full left-0 right-0 bg-white border border-gray-300 border-t-0 rounded-b-md shadow-lg z-10 max-h-52 overflow-y-auto"
+												transition:fly={{ y: -5, duration: 200 }}
+											>
+												{#each clientSugestii as sugestie (sugestie.id)}
+													<div
+														role="button"
+														tabindex="0"
+														class="px-3 py-2 cursor-pointer hover:bg-gray-100"
+																														onmousedown={() => selectClient(sugestie)}
+																												>
+																													{sugestie.nume}
+																												</div>								{/each}
+											</ul>
+										{/if}
+									</div>
+									<button type="button" onclick={() => showClientPopup = true} class="bg-blue-500 text-white p-2 rounded-md">+</button>
+								</div>
+				                <div class="flex flex-col">
+				                    <label for="cui" class="font-bold text-sm mb-1 text-gray-700">CUI</label>
+				                    <input type="text" id="cui" bind:value={raport.cui} class={inputClass} />
+				                </div>				<div class="flex flex-col">
 					<label for="locatie" class="font-bold text-sm mb-1 text-gray-700">Locatie</label>
 					<input type="text" id="locatie" bind:value={raport.locatie} class={inputClass} />
 				</div>
@@ -763,6 +770,8 @@
 		<div transition:fly={{ y: -10, duration: 300 }}>
 		                        <ClientPopup on:close={() => { showClientPopup = false; }} on:clientSaved={(e) => {		        raport.client = e.detail.nume;
 		        raport.client_id = e.detail.client_id;
+		        raport.locatie = e.detail.locatie;
+		        raport.cui = e.detail.cui;
 		        showClientPopup = false;
 		    }} />
 		</div>
