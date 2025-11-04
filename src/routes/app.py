@@ -393,6 +393,25 @@ def create_client():
     finally:
         conn.close()
 
+@app.route('/api/client/<int:client_id>', methods=['PUT'])
+def update_client(client_id):
+    data = request.json
+    conn = get_db_conn()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            UPDATE Clienti SET
+                nume = ?, cui = ?, adresa = ?, locatie = ?
+            WHERE id = ?
+        """, (data.get('nume'), data.get('cui'), data.get('adresa'), data.get('locatie'), client_id))
+        conn.commit()
+        return jsonify({"success": True, "message": "Client actualizat cu succes"}), 200
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"success": False, "message": str(e)}), 500
+    finally:
+        conn.close()
+
 @app.route('/api/client/<int:client_id>/utilaje', methods=['GET'])
 def get_client_utilaje(client_id):
     conn = get_db_conn()

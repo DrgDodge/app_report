@@ -2,6 +2,7 @@
     import { onMount } from 'svelte';
     import ClientDetailsPopup from './ClientDetailsPopup.svelte';
     import EditPartPopup from './EditPartPopup.svelte';
+    import EditClientPopup from './EditClientPopup.svelte';
     import type { Client, Part } from './types';
 
     let clients: Client[] = [];
@@ -10,6 +11,7 @@
     let clientSearch = '';
     let partSearch = '';
     let editingPart: Part | null = null;
+    let editingClient: Client | null = null;
 
     onMount(async () => {
         const resClients = await fetch('/api/clients');
@@ -28,6 +30,10 @@
         editingPart = part;
     }
 
+    function editClient(client: Client) {
+        editingClient = client;
+    }
+
     function handlePartSaved(event: CustomEvent<Part>) {
         const updatedPart = event.detail;
         const index = parts.findIndex(p => p.id === updatedPart.id);
@@ -35,6 +41,15 @@
             parts[index] = updatedPart;
         }
         editingPart = null;
+    }
+
+    function handleClientSaved(event: CustomEvent<Client>) {
+        const updatedClient = event.detail;
+        const index = clients.findIndex(c => c.id === updatedClient.id);
+        if (index !== -1) {
+            clients[index] = updatedClient;
+        }
+        editingClient = null;
     }
 
     $: filteredClients = clients.filter(client => client.nume.toLowerCase().includes(clientSearch.toLowerCase()));
@@ -47,9 +62,12 @@
         <input type="text" placeholder="Search Clients..." class="w-full p-2 border border-gray-300 rounded-md mb-2" bind:value={clientSearch} />
         <ul class="divide-y divide-gray-200">
             {#each filteredClients as client (client.id)}
-                <button class="w-full text-left py-2 px-4 rounded-md hover:bg-gray-100" on:click={() => showClientDetails(client.id)}>
-                    {client.nume}
-                </button>
+                <li class="py-2 flex justify-between items-center">
+                    <button class="w-full text-left py-2 px-4 rounded-md hover:bg-gray-100" on:click={() => showClientDetails(client.id)}>
+                        {client.nume}
+                    </button>
+                    <button class="bg-blue-500 text-white px-2 py-1 rounded-md" on:click={() => editClient(client)}>Edit</button>
+                </li>
             {/each}
         </ul>
     </div>
@@ -73,4 +91,8 @@
 
 {#if editingPart}
     <EditPartPopup part={editingPart} on:close={() => editingPart = null} on:partSaved={handlePartSaved} />
+{/if}
+
+{#if editingClient}
+    <EditClientPopup client={editingClient} on:close={() => editingClient = null} on:clientSaved={handleClientSaved} />
 {/if}
