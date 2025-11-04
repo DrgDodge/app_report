@@ -79,7 +79,9 @@
 	let pieseNecesare = $state<Piesa[]>([]);
 
 	let clientSugestii = $state<ClientSugestie[]>([]);
-	    let utilajSugestii = $state<UtilajSugestie[]>([]);	let serieSugestii = $state<string[]>([]);
+	    let utilajSugestii = $state<string[]>([]);
+    let clientUtilaje = $state<UtilajSugestie[]>([]);
+    let showClientUtilaje = $state(false);	let serieSugestii = $state<string[]>([]);
 	let pieseSugestii = $state<PiesaSugestie[]>([]);
 	let showClientSugestii = $state(false);
 	let showUtilajSugestii = $state(false);
@@ -202,11 +204,16 @@
 		}, 300);
 	}
 
-	function selectUtilaj(sugestie: UtilajSugestie) {
-		raport.utilaj = sugestie.nume;
-		raport.serie = sugestie.serie;
+	function selectUtilaj(sugestie: UtilajSugestie | string) {
+		if (typeof sugestie === 'string') {
+			raport.utilaj = sugestie;
+		} else {
+			raport.utilaj = sugestie.nume;
+			raport.serie = sugestie.serie;
+		}
 		utilajSugestii = [];
 		showUtilajSugestii = false;
+		showClientUtilaje = false;
 	}
 
 	let serieDebounceTimer: number;
@@ -484,15 +491,15 @@
 							if (raport.client_id) {
 								const res = await fetch(`${API_BASE_URL}/client/${raport.client_id}/utilaje`);
 								if (res.ok) {
-									utilajSugestii = await res.json();
-									showUtilajeList = true;
+									clientUtilaje = await res.json();
+									showClientUtilaje = true;
 								}
 							}
 						}} class="bg-blue-500 text-white p-2 rounded-md">...</button>
 					</div>
-					{#if showUtilajeList}
+					{#if showClientUtilaje}
 						<ul class="absolute top-full left-0 right-0 bg-white border border-gray-300 border-t-0 rounded-b-md shadow-lg z-10 max-h-52 overflow-y-auto">
-							{#each utilajSugestii as utilaj (utilaj.id)}
+							{#each clientUtilaje as utilaj (utilaj.id)}
 								<div role="button" tabindex="0" class="px-3 py-2 cursor-pointer hover:bg-gray-100" onmousedown={() => selectUtilaj(utilaj)}>
 									{utilaj.nume} - {utilaj.serie}
 								</div>
