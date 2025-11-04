@@ -119,6 +119,23 @@
             padding-left: 10px;
         }
 
+        .obs-summary-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .obs-summary-table .obs-cell {
+            width: 50%;
+            vertical-align: top;
+            padding-right: 5px;
+        }
+
+        .obs-summary-table .summary-cell {
+            width: 50%;
+            vertical-align: bottom;
+            padding-left: 5px;
+        }
+
         .form-section {
             margin-bottom: 10px;
         }
@@ -298,12 +315,32 @@
                         </div>
                     </div>
 
-                    <div class="form-section">
-                        <span class="form-label">OBS:</span>
-                        <div class="form-text-box" style="min-height: 100px;">
-                            {{ raport.observatii | default('', true) }} {# Am adăugat acest câmp din imagine #}
-                        </div>
-                    </div>
+                    <table class="obs-summary-table">
+                        <tr>
+                            <td class="obs-cell">
+                                <div class="form-section">
+                                    <span class="form-label">OBS:</span>
+                                    <div class="form-text-box" style="min-height: 100px;">
+                                        {{ raport.observatii | default('', true) }}
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="summary-cell">
+                                <div class="form-section">
+                                    <table class="summary-table">
+                                        <tr>
+                                            <td class="label">Manopera (ore)</td>
+                                            <td>{{ raport.manopera_ore }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="label">Km efectuati</td>
+                                            <td>{{ raport.km_efectuati }}</td>
+                                        </tr>
+                                    </table>
+                               </div>
+                            </td>
+                        </tr>
+                    </table>
                 </td>
 
                 <td class="right-col">
@@ -367,18 +404,6 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="form-section" style="margin-top: 20px;">
-                        <table class="summary-table">
-                            <tr>
-                                <td class="label">Manopera (ore)</td>
-                                <td>{{ raport.manopera_ore }}</td>
-                            </tr>
-                            <tr>
-                                <td class="label">Km efectuati</td>
-                                <td>{{ raport.km_efectuati }}</td>
-                            </tr>
-                        </table>
-                   </div>
                 </td>
             </tr>
         </table>
