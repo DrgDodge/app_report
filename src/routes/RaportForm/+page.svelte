@@ -480,7 +480,7 @@
 																					role="button"
 																					tabindex="0"
 																					class="px-3 py-2 cursor-pointer hover:bg-gray-100"
-																					onmousedown={() => alert('Clicked on: ' + sugestie)}
+																					on:click={() => alert('Clicked on: ' + sugestie)}
 																				>
 																					{sugestie}
 																				</div>									{/each}
