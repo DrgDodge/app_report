@@ -8,7 +8,8 @@
         cui: '',
         nr_reg_com: '',
         iban: '',
-        adresa: ''
+        adresa: '',
+        locatie: ''
     };
 
     async function saveClient() {
@@ -60,6 +61,10 @@
                 <div class="flex flex-col col-span-2">
                     <label for="adresa" class="font-bold text-sm mb-1 text-gray-700">Adresa</label>
                     <input type="text" id="adresa" bind:value={client.adresa} class="w-full p-2 border border-gray-300 rounded-md" />
+                </div>
+                <div class="flex flex-col col-span-2">
+                    <label for="locatie" class="font-bold text-sm mb-1 text-gray-700">Locatie</label>
+                    <input type="text" id="locatie" bind:value={client.locatie} class="w-full p-2 border border-gray-300 rounded-md" />
                 </div>
             </div>
 

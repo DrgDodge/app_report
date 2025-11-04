@@ -7,7 +7,8 @@ CREATE TABLE IF NOT EXISTS Clienti (
     cui TEXT,
     nr_reg_com TEXT,
     iban TEXT,
-    adresa TEXT
+    adresa TEXT,
+    locatie TEXT
 );
 
 -- Tabelul "master" pentru piese (pentru autocomplete)
