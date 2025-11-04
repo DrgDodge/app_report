@@ -1,4 +1,5 @@
 <script lang="ts">
+  import '../app.css';
   // 1. Asigură-te că imporți fișierul CSS principal al Tailwind
   // (Numele poate fi app.pcss, app.css, tailwind.css, etc.,
   // în funcție de cum l-ai configurat)
