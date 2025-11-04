@@ -314,33 +314,6 @@
                             {{ raport.operatii_efectuate }}
                         </div>
                     </div>
-
-                    <table class="obs-summary-table">
-                        <tr>
-                            <td class="obs-cell">
-                                <div class="form-section">
-                                    <span class="form-label">OBS:</span>
-                                    <div class="form-text-box" style="min-height: 100px;">
-                                        {{ raport.observatii | default('', true) }}
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="summary-cell">
-                                <div class="form-section">
-                                    <table class="summary-table">
-                                        <tr>
-                                            <td class="label">Manopera (ore)</td>
-                                            <td>{{ raport.manopera_ore }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="label">Km efectuati</td>
-                                            <td>{{ raport.km_efectuati }}</td>
-                                        </tr>
-                                    </table>
-                               </div>
-                            </td>
-                        </tr>
-                    </table>
                 </td>
 
                 <td class="right-col">
@@ -404,6 +377,36 @@
                             </tbody>
                         </table>
                     </div>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <table class="obs-summary-table">
+                        <tr>
+                            <td class="obs-cell">
+                                <div class="form-section">
+                                    <span class="form-label">OBS:</span>
+                                    <div class="form-text-box" style="min-height: 100px;">
+                                        {{ raport.observatii | default('', true) }}
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="summary-cell">
+                                <div class="form-section">
+                                    <table class="summary-table">
+                                        <tr>
+                                            <td class="label">Manopera (ore)</td>
+                                            <td>{{ raport.manopera_ore }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="label">Km efectuati</td>
+                                            <td>{{ raport.km_efectuati }}</td>
+                                        </tr>
+                                    </table>
+                               </div>
+                            </td>
+                        </tr>
+                    </table>
                 </td>
             </tr>
         </table>
