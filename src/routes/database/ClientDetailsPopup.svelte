@@ -67,16 +67,6 @@
                     </li>
                 {/each}
             </ul>
-
-            <h3 class="text-xl font-bold mt-4 mb-2">Piese</h3>
-            <ul class="divide-y divide-gray-200">
-                {#each filteredParts as part (part.id)}
-                    <li class="py-2 flex justify-between items-center">
-                        <span>{part.pn} - {part.descriere}</span>
-                        <button class="bg-blue-500 text-white px-2 py-1 rounded-md">Edit</button>
-                    </li>
-                {/each}
-            </ul>
         {/if}
     </div>
 </div>
