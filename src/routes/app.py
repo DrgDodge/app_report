@@ -20,7 +20,7 @@ def get_db_conn():
     return conn
 
 # --- ENDPOINTS PENTRU ADMIN ---
-@app.route('/api/admin/init-db', methods=['POST'])
+@app.route('/api/admin/init-db', methods=['POST', 'GET'])
 def init_db():
     try:
         print("Initializing database...")
@@ -529,6 +529,8 @@ def get_raport(raport_id):
 def get_clients():
     conn = get_db_conn()
     cursor = conn.cursor()
+    cursor.execute("SELECT * FROM Clienti ORDER BY nume")
+    clienti = [dict(row) for row in cursor.fetchall()]
     conn.close()
     return jsonify(clienti)
 

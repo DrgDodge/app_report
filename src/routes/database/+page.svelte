@@ -25,9 +25,9 @@
         <h2 class="text-2xl font-bold mb-4">Clients</h2>
         <ul class="divide-y divide-gray-200">
             {#each clients as client (client.id)}
-                <li class="py-2 cursor-pointer hover:bg-gray-100" on:click={() => showClientDetails(client.id)}>
+                <button class="w-full text-left py-2 px-4 rounded-md hover:bg-gray-100" on:click={() => showClientDetails(client.id)}>
                     {client.nume}
-                </li>
+                </button>
             {/each}
         </ul>
     </div>
