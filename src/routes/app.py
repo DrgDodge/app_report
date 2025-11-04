@@ -401,9 +401,9 @@ def update_client(client_id):
     try:
         cursor.execute("""
             UPDATE Clienti SET
-                nume = ?, cui = ?, adresa = ?, locatie = ?
+                nume = ?, cui = ?, nr_reg_com = ?, iban = ?, adresa = ?, locatie = ?
             WHERE id = ?
-        """, (data.get('nume'), data.get('cui'), data.get('adresa'), data.get('locatie'), client_id))
+        """, (data.get('nume'), data.get('cui'), data.get('nr_reg_com'), data.get('iban'), data.get('adresa'), data.get('locatie'), client_id))
         conn.commit()
         return jsonify({"success": True, "message": "Client actualizat cu succes"}), 200
     except Exception as e:

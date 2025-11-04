@@ -46,6 +46,14 @@
                     <label for="cui" class="font-bold text-sm mb-1 text-gray-700">CUI</label>
                     <input type="text" id="cui" bind:value={updatedClient.cui} class="w-full p-2 border border-gray-300 rounded-md" />
                 </div>
+                <div class="flex flex-col">
+                    <label for="nr_reg_com" class="font-bold text-sm mb-1 text-gray-700">Nr. Reg. Com.</label>
+                    <input type="text" id="nr_reg_com" bind:value={updatedClient.nr_reg_com} class="w-full p-2 border border-gray-300 rounded-md" />
+                </div>
+                <div class="flex flex-col">
+                    <label for="iban" class="font-bold text-sm mb-1 text-gray-700">IBAN</label>
+                    <input type="text" id="iban" bind:value={updatedClient.iban} class="w-full p-2 border border-gray-300 rounded-md" />
+                </div>
                 <div class="flex flex-col col-span-2">
                     <label for="adresa" class="font-bold text-sm mb-1 text-gray-700">Adresa</label>
                     <input type="text" id="adresa" bind:value={updatedClient.adresa} class="w-full p-2 border border-gray-300 rounded-md" />

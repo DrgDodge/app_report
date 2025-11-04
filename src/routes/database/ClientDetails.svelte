@@ -6,6 +6,8 @@
     <div class="p-4 border border-gray-200 rounded-lg">
         <h3 class="text-xl font-bold mb-2">{clientDetails.client.nume}</h3>
         <p><strong>CUI:</strong> {clientDetails.client.cui}</p>
+        <p><strong>Nr. Reg. Com.:</strong> {clientDetails.client.nr_reg_com}</p>
+        <p><strong>IBAN:</strong> {clientDetails.client.iban}</p>
         <p><strong>Adresa:</strong> {clientDetails.client.adresa}</p>
         <p><strong>Locatie:</strong> {clientDetails.client.locatie}</p>
 
