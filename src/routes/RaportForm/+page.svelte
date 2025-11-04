@@ -315,6 +315,12 @@
 	// --- Functie de Salvare ---
 	async function handleSubmit(event: Event) {
 		event.preventDefault();
+
+		if (raport.client && !raport.client_id) {
+			alert("Clientul nu a fost selectat corect. Va rugam selectati un client din lista sau creati unul nou.");
+			return;
+		}
+
 		statusMesaj = 'Se salveaza...';
 		statusTip = 'succes';
 

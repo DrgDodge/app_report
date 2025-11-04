@@ -403,11 +403,15 @@ def create_client():
             VALUES (?, ?, ?, ?, ?, ?)
         """, (data.get('nume'), data.get('cui'), data.get('nr_reg_com'), data.get('iban'), data.get('adresa'), data.get('locatie')))
         client_id = cursor.lastrowid
+
+        # Add a default Utilaj for the new client
+        cursor.execute("INSERT INTO Utilaje (client_id, nume, serie) VALUES (?, ?, ?)", (client_id, 'Default Utilaj', '0000'))
+
         conn.commit()
-        
+
         cursor.execute("SELECT * FROM Clienti WHERE id = ?", (client_id,))
         new_client_data = cursor.fetchone()
-        
+
         return jsonify(dict(new_client_data)), 201
     except Exception as e:
         conn.rollback()
