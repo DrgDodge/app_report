@@ -464,7 +464,7 @@
 							id="utilaj"
 							bind:value={raport.utilaj}
 							class={inputClass}
-															oninput={handleUtilajInput}						onblur={() => setTimeout(() => (showUtilajSugestii = false), 200)}
+															oninput={handleUtilajInput}						onblur={() => setTimeout(() => (showUtilajSugestii = false), 500)}
 								onfocus={() => {
 									showUtilajSugestii = true;
 								}}
@@ -480,7 +480,7 @@
 																					role="button"
 																					tabindex="0"
 																					class="px-3 py-2 cursor-pointer hover:bg-gray-100"
-																					on:click={() => alert('Clicked on: ' + sugestie)}
+																					onmousedown={() => selectUtilaj(sugestie)}
 																				>
 																					{sugestie}
 																				</div>									{/each}

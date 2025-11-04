@@ -403,6 +403,9 @@ def create_client():
             VALUES (?, ?, ?, ?, ?, ?)
         """, (data.get('nume'), data.get('cui'), data.get('nr_reg_com'), data.get('iban'), data.get('adresa'), data.get('locatie')))
         client_id = cursor.lastrowid
+        if not client_id:
+            cursor.execute("SELECT id FROM Clienti WHERE nume = ?", (data.get('nume'),))
+            client_id = cursor.fetchone()['id']
 
         # Add a default Utilaj for the new client
         cursor.execute("INSERT INTO Utilaje (client_id, nume, serie) VALUES (?, ?, ?)", (client_id, 'Default Utilaj', '0000'))
