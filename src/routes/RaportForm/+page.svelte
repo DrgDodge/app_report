@@ -727,7 +727,10 @@
 														class="px-3 py-2 cursor-pointer hover:bg-gray-100"
 														onmousedown={() => selectPiesa(sugestie)}
 													>
-														<strong class="font-medium">{sugestie.pn}</strong> - {sugestie.descriere}
+														{#if sugestie.pn && !sugestie.pn.startsWith('NO-')}
+															<strong class="font-medium">{sugestie.pn}</strong> -
+														{/if}
+														{sugestie.descriere}
 													</div>
 																										{/each}
 																									</ul>
@@ -753,7 +756,10 @@
 																																					                                                                                                                                                                                        class="px-3 py-2 cursor-pointer hover:bg-gray-100"
 																																					                                                                                                                                                                                        onmousedown={() => selectDescriere(sugestie)}
 																																					                                                                                                                                                                                    >
-																																					                                                                                                                                                                                        <strong class="font-medium">{sugestie.pn}</strong> - {sugestie.descriere}
+																																					                                                                                                                                                                                        {#if sugestie.pn && !sugestie.pn.startsWith('NO-')}
+																																					                                                                                                                                                                                            <strong class="font-medium">{sugestie.pn}</strong> -
+																																					                                                                                                                                                                                        {/if}
+																																					                                                                                                                                                                                        {sugestie.descriere}
 																																					                                                                                                                                                                                    </div>
 																																					                                                                                                                                                                                {/each}																																					                                                                                                                            </ul>
 																																					                                                                                                                        {/if}																						</td>									<td class="border border-gray-300 p-1">
@@ -824,7 +830,10 @@
                                                         class="px-3 py-2 cursor-pointer hover:bg-gray-100"
                                                         onmousedown={() => selectPiesa(sugestie)}
                                                     >
-                                                        <strong class="font-medium">{sugestie.pn}</strong> - {sugestie.descriere}
+                                                        {#if sugestie.pn && !sugestie.pn.startsWith('NO-')}
+                                                            <strong class="font-medium">{sugestie.pn}</strong> -
+                                                        {/if}
+                                                        {sugestie.descriere}
                                                     </div>
                                                 {/each}
                                             </ul>
@@ -852,7 +861,10 @@
                                                         class="px-3 py-2 cursor-pointer hover:bg-gray-100"
                                                         onmousedown={() => selectDescriere(sugestie)}
                                                     >
-                                                        <strong class="font-medium">{sugestie.pn}</strong> - {sugestie.descriere}
+                                                        {#if sugestie.pn && !sugestie.pn.startsWith('NO-')}
+                                                            <strong class="font-medium">{sugestie.pn}</strong> -
+                                                        {/if}
+                                                        {sugestie.descriere}
                                                     </div>
                                                 {/each}
                                             </ul>
