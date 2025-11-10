@@ -4,6 +4,7 @@
 
 	// --- Tipuri de date ---
 	interface Piesa {
+		id: number | null;
 		pn: string;
 		descriere: string;
 		buc: number | null;
@@ -38,6 +39,7 @@
 	}
 
 	    interface PiesaSugestie {
+			id: number;
 			pn: string;
 			descriere: string;
 		}
@@ -108,13 +110,13 @@
 	
 	    // --- Functii pentru liste dinamice ---
 	    function addPiesaInlocuita() {
-	        pieseInlocuite = [...pieseInlocuite, { pn: '', descriere: '', buc: 1 }];
+	        pieseInlocuite = [...pieseInlocuite, { id: null, pn: '', descriere: '', buc: 1 }];
 	    }
 	    function removePiesaInlocuita(index: number) {
 	        pieseInlocuite.splice(index, 1);
 	    }
 	    function addPiesaNecesara() {
-	        pieseNecesare = [...pieseNecesare, { pn: '', descriere: '', buc: 1 }];
+	        pieseNecesare = [...pieseNecesare, { id: null, pn: '', descriere: '', buc: 1 }];
 	    }
 	    function removePiesaNecesara(index: number) {
 	        pieseNecesare.splice(index, 1);
@@ -290,6 +292,14 @@
 	function selectDescriere(sugestie: PiesaSugestie) {
 		if (activeDescriereIndex === null) return;
 
+		const list = activeDescriereTip === 'inlocuite' ? pieseInlocuite : pieseNecesare;
+
+		// Check if part with same id already exists
+		if (list.some(p => p.id === sugestie.id)) {
+			alert('Aceasta piesa a fost deja adaugata.');
+			return;
+		}
+
 		if (activeDescriereTip === 'inlocuite') {
 			pieseInlocuite[activeDescriereIndex] = { ...pieseInlocuite[activeDescriereIndex], ...sugestie };
 		} else {
@@ -337,6 +347,14 @@
 
 	function selectPiesa(sugestie: PiesaSugestie) {
 		if (activePieseIndex === null) return;
+
+		const list = activePieseTip === 'inlocuite' ? pieseInlocuite : pieseNecesare;
+
+		// Check if part with same id already exists
+		if (list.some(p => p.id === sugestie.id)) {
+			alert('Aceasta piesa a fost deja adaugata.');
+			return;
+		}
 
 		if (activePieseTip === 'inlocuite') {
 			pieseInlocuite[activePieseIndex] = { ...pieseInlocuite[activePieseIndex], ...sugestie };
