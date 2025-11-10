@@ -78,6 +78,8 @@
 	let pieseInlocuite = $state<Piesa[]>([]);
 	let pieseNecesare = $state<Piesa[]>([]);
 
+	let allClients = $state<ClientSugestie[]>([]);
+	let allParts = $state<PiesaSugestie[]>([]);
 	let clientSugestii = $state<ClientSugestie[]>([]);
 	    	let utilajSugestii = $state<UtilajSugestie[]>([]);    let clientUtilaje = $state<UtilajSugestie[]>([]);
     let showClientUtilaje = $state(false);	let serieSugestii = $state<string[]>([]);
@@ -308,15 +310,22 @@
 
 		showPieseSugestii = true;
 
+		if (allParts.length === 0) {
+			const res = await fetch(`${API_BASE_URL}/parts`);
+			if (res.ok) {
+				allParts = await res.json();
+			}
+		}
+
 		clearTimeout(pieseDebounceTimer);
-		if (query.length < 2) {
-			pieseSugestii = [];
+		if (query.length < 1) {
+			pieseSugestii = allParts;
 			return;
 		}
-		pieseDebounceTimer = setTimeout(async () => {
-			const res = await fetch(`${API_BASE_URL}/search/piese?q=${query}`);
-			pieseSugestii = await res.json();
-		}, 300);
+
+		pieseDebounceTimer = setTimeout(() => {
+			pieseSugestii = allParts.filter(p => p.pn.toLowerCase().includes(query.toLowerCase()) || p.descriere.toLowerCase().includes(query.toLowerCase()));
+		}, 100);
 	}
 
 	function selectPiesa(sugestie: PiesaSugestie) {
@@ -595,6 +604,7 @@
 					                    <table class="w-full border-collapse">
 					                        <thead class="bg-gray-100">
 					                            <tr>
+					                                <th class="border border-gray-300 p-1 text-left text-sm w-[5%]">No.</th>
 					                                <th class="border border-gray-300 p-1 text-left text-sm w-[30%]">P/N</th>
 					                                <th class="border border-gray-300 p-1 text-left text-sm w-[50%]">Descriere</th>
 					                                <th class="border border-gray-300 p-1 text-left text-sm w-[10%]">Buc</th>
@@ -604,15 +614,17 @@
 					                        </thead>						<tbody>
 							{#each pieseInlocuite as piesa, i (i)}
 								<tr>
+									<td class="border border-gray-300 p-1">{i + 1}</td>
 									<td class="border border-gray-300 p-1 relative">
 										<input
 											type="text"
 											bind:value={piesa.pn}
 											class={inputClassTable}
-											             onblur={() => setTimeout(() => (showPieseSugestii = false), 200)}											onfocus={() => {
+											             onblur={() => setTimeout(() => (showPieseSugestii = false), 200)}											onfocus={(e) => {
 												activePieseIndex = i;
 												activePieseTip = 'inlocuite';
 												showPieseSugestii = true;
+												handlePieseInput(e, i, 'inlocuite');
 											}}
 										/>
 										{#if showPieseSugestii && activePieseIndex === i && activePieseTip === 'inlocuite' && pieseSugestii.length > 0}
@@ -688,6 +700,7 @@
 					<table class="w-full border-collapse">
 						<thead class="bg-gray-100">
 							<tr>
+								<th class="border border-gray-300 p-1 text-left text-sm w-[5%]">No.</th>
 								<th class="border border-gray-300 p-1 text-left text-sm w-[30%]">P/N</th>
 								<th class="border border-gray-300 p-1 text-left text-sm w-[50%]">Descriere</th>
 								<th class="border border-gray-300 p-1 text-left text-sm w-[10%]">Buc</th>
@@ -697,6 +710,7 @@
 						<tbody>
 							{#each pieseNecesare as piesa, i (i)}
 								<tr>
+									<td class="border border-gray-300 p-1">{i + 1}</td>
 									<td class="border border-gray-300 p-1 relative">
 										<input
 											type="text"
@@ -704,10 +718,11 @@
 											class={inputClassTable}
 																																	onblur={() => setTimeout(() => (showPieseSugestii = false), 200)}
 																																	oninput={(e) => handlePieseInput(e, i, 'necesare')}
-																																	onfocus={() => {
+																																	onfocus={(e) => {
 																																		activePieseIndex = i;
 																																		activePieseTip = 'necesare';
 																																		showPieseSugestii = true;
+																																		handlePieseInput(e, i, 'necesare');
 																																	}}
 																																/>										                                        {#if showPieseSugestii && activePieseIndex === i && activePieseTip === 'necesare' && pieseSugestii.length > 0}
 										                                            <ul
