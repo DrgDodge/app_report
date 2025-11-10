@@ -365,15 +365,20 @@
 		const list = activeDescriereTip === 'inlocuite' ? pieseInlocuite : pieseNecesare;
 
 		// Check if part with same id already exists
-		if (list.some(p => p.id === sugestie.id)) {
+		if (list.some(p => p.id === sugestie.id && p.id !== null)) {
 			alert('Aceasta piesa a fost deja adaugata.');
 			return;
 		}
 
+		const newPiesa = { ...sugestie };
+		if (newPiesa.pn && newPiesa.pn.startsWith('NO-')) {
+			newPiesa.pn = '';
+		}
+
 		if (activeDescriereTip === 'inlocuite') {
-			pieseInlocuite[activeDescriereIndex] = { ...pieseInlocuite[activeDescriereIndex], ...sugestie };
+			pieseInlocuite[activeDescriereIndex] = { ...pieseInlocuite[activeDescriereIndex], ...newPiesa };
 		} else {
-			pieseNecesare[activeDescriereIndex] = { ...pieseNecesare[activeDescriereIndex], ...sugestie };
+			pieseNecesare[activeDescriereIndex] = { ...pieseNecesare[activeDescriereIndex], ...newPiesa };
 		}
 		descriereSugestii = [];
 		showDescriereSugestii = false;
@@ -417,15 +422,20 @@
 		const list = activePieseTip === 'inlocuite' ? pieseInlocuite : pieseNecesare;
 
 		// Check if part with same id already exists
-		if (list.some(p => p.id === sugestie.id)) {
+		if (list.some(p => p.id === sugestie.id && p.id !== null)) {
 			alert('Aceasta piesa a fost deja adaugata.');
 			return;
 		}
 
+		const newPiesa = { ...sugestie };
+		if (newPiesa.pn && newPiesa.pn.startsWith('NO-')) {
+			newPiesa.pn = '';
+		}
+
 		if (activePieseTip === 'inlocuite') {
-			pieseInlocuite[activePieseIndex] = { ...pieseInlocuite[activePieseIndex], ...sugestie };
+			pieseInlocuite[activePieseIndex] = { ...pieseInlocuite[activePieseIndex], ...newPiesa };
 		} else {
-			pieseNecesare[activePieseIndex] = { ...pieseNecesare[activePieseIndex], ...sugestie };
+			pieseNecesare[activePieseIndex] = { ...pieseNecesare[activePieseIndex], ...newPiesa };
 		}
 		pieseSugestii = [];
 		showPieseSugestii = false;
