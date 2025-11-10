@@ -218,34 +218,46 @@ def create_raport():
         for piesa in piese_inlocuite:
             logging.debug(f"Saving piesa inlocuita: {piesa}")
             if piesa.get('pn') or piesa.get('descriere'):
-                if piesa.get('pn'):
+                pn = piesa.get('pn')
+                descriere = piesa.get('descriere', '')
+                if not pn and descriere:
+                    import time
+                    pn = f"NO-{descriere[:10]}-{int(time.time() * 1000)}" # Create a unique PN
+
+                if pn:
                     cursor.execute("INSERT OR IGNORE INTO PieseMaster (pn, descriere) VALUES (?, ?)", 
-                                   (piesa.get('pn'), piesa.get('descriere', '')))
-                    if piesa.get('descriere'):
+                                   (pn, descriere))
+                    if descriere:
                         cursor.execute("UPDATE PieseMaster SET descriere = ? WHERE pn = ?", 
-                                       (piesa.get('descriere'), piesa.get('pn')))
+                                       (descriere, pn))
 
                 cursor.execute("""
                     INSERT INTO PieseInlocuite (raport_id, pn, descriere, buc)
                     VALUES (?, ?, ?, ?)
-                """, (raport_id, piesa.get('pn'), piesa.get('descriere'), piesa.get('buc')))
+                """, (raport_id, pn, descriere, piesa.get('buc')))
         
         # Pas 4: Insereaza piesele necesare
         logging.debug(f"Saving {len(piese_necesare)} necesare parts for raport {raport_id}")
         for piesa in piese_necesare:
             logging.debug(f"Saving piesa necesara: {piesa}")
             if piesa.get('pn') or piesa.get('descriere'):
-                if piesa.get('pn'):
+                pn = piesa.get('pn')
+                descriere = piesa.get('descriere', '')
+                if not pn and descriere:
+                    import time
+                    pn = f"NO-{descriere[:10]}-{int(time.time() * 1000)}" # Create a unique PN
+
+                if pn:
                     cursor.execute("INSERT OR IGNORE INTO PieseMaster (pn, descriere) VALUES (?, ?)", 
-                                   (piesa.get('pn'), piesa.get('descriere', '')))
-                    if piesa.get('descriere'):
+                                   (pn, descriere))
+                    if descriere:
                         cursor.execute("UPDATE PieseMaster SET descriere = ? WHERE pn = ?", 
-                                       (piesa.get('descriere'), piesa.get('pn')))
+                                       (descriere, pn))
 
                 cursor.execute("""
                     INSERT INTO PieseNecesare (raport_id, pn, descriere, buc)
                     VALUES (?, ?, ?, ?)
-                """, (raport_id, piesa.get('pn'), piesa.get('descriere'), piesa.get('buc')))
+                """, (raport_id, pn, descriere, piesa.get('buc')))
 
         # Pas 5: Insereaza manopera
         for item in manopera:
@@ -692,6 +704,57 @@ def update_part(part_id):
         """, (data.get('pn'), data.get('descriere'), part_id))
         conn.commit()
         return jsonify({"success": True, "message": "Piesa actualizata cu succes"}), 200
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"success": False, "message": str(e)}), 500
+    finally:
+        conn.close()
+
+@app.route('/api/client/<int:client_id>', methods=['DELETE'])
+def delete_client(client_id):
+    conn = get_db_conn()
+    cursor = conn.cursor()
+    try:
+        # Check if client is used in any reports
+        cursor.execute("SELECT id FROM Rapoarte WHERE client_id = ?", (client_id,))
+        if cursor.fetchone():
+            return jsonify({"success": False, "message": "Client cannot be deleted, it is used in reports."}), 400
+        
+        cursor.execute("DELETE FROM Utilaje WHERE client_id = ?", (client_id,))
+        cursor.execute("DELETE FROM Clienti WHERE id = ?", (client_id,))
+        conn.commit()
+        return jsonify({"success": True, "message": "Client deleted successfully"}), 200
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"success": False, "message": str(e)}), 500
+    finally:
+        conn.close()
+
+@app.route('/api/part/<int:part_id>', methods=['DELETE'])
+def delete_part(part_id):
+    conn = get_db_conn()
+    cursor = conn.cursor()
+    try:
+        # First get the pn of the part
+        cursor.execute("SELECT pn FROM PieseMaster WHERE id = ?", (part_id,))
+        part = cursor.fetchone()
+        if not part:
+            return jsonify({"success": False, "message": "Part not found"}), 404
+        
+        pn = part['pn']
+        
+        # Check if part is used in any reports
+        cursor.execute("SELECT id FROM PieseInlocuite WHERE pn = ?", (pn,))
+        if cursor.fetchone():
+            return jsonify({"success": False, "message": "Part cannot be deleted, it is used in reports."}), 400
+        
+        cursor.execute("SELECT id FROM PieseNecesare WHERE pn = ?", (pn,))
+        if cursor.fetchone():
+            return jsonify({"success": False, "message": "Part cannot be deleted, it is used in reports."}), 400
+
+        cursor.execute("DELETE FROM PieseMaster WHERE id = ?", (part_id,))
+        conn.commit()
+        return jsonify({"success": True, "message": "Part deleted successfully"}), 200
     except Exception as e:
         conn.rollback()
         return jsonify({"success": False, "message": str(e)}), 500

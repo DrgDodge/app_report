@@ -52,6 +52,30 @@
         editingClient = null;
     }
 
+    async function deleteClient(clientId: number) {
+        if (confirm('Are you sure you want to delete this client?')) {
+            const res = await fetch(`/api/client/${clientId}`, { method: 'DELETE' });
+            if (res.ok) {
+                clients = clients.filter(c => c.id !== clientId);
+            } else {
+                const data = await res.json();
+                alert(data.message);
+            }
+        }
+    }
+
+    async function deletePart(partId: number) {
+        if (confirm('Are you sure you want to delete this part?')) {
+            const res = await fetch(`/api/part/${partId}`, { method: 'DELETE' });
+            if (res.ok) {
+                parts = parts.filter(p => p.id !== partId);
+            } else {
+                const data = await res.json();
+                alert(data.message);
+            }
+        }
+    }
+
     $: filteredClients = clients.filter(client => client.nume.toLowerCase().includes(clientSearch.toLowerCase()));
     $: filteredParts = parts.filter(part => part.pn.toLowerCase().includes(partSearch.toLowerCase()) || part.descriere.toLowerCase().includes(partSearch.toLowerCase()));
 </script>
@@ -66,7 +90,10 @@
                     <button class="w-full text-left py-2 px-4 rounded-md hover:bg-gray-100" on:click={() => showClientDetails(client.id)}>
                         {client.nume}
                     </button>
-                    <button class="bg-blue-500 text-white px-2 py-1 rounded-md" on:click={() => editClient(client)}>Edit</button>
+                    <div>
+                        <button class="bg-blue-500 text-white px-2 py-1 rounded-md" on:click={() => editClient(client)}>Edit</button>
+                        <button class="bg-red-500 text-white px-2 py-1 rounded-md ml-2" on:click={() => deleteClient(client.id)}>Delete</button>
+                    </div>
                 </li>
             {/each}
         </ul>
@@ -78,7 +105,10 @@
             {#each filteredParts as part (part.id)}
                 <li class="py-2 flex justify-between items-center">
                     <span>{part.pn} - {part.descriere}</span>
-                    <button class="bg-blue-500 text-white px-2 py-1 rounded-md" on:click={() => editPart(part)}>Edit</button>
+                    <div>
+                        <button class="bg-blue-500 text-white px-2 py-1 rounded-md" on:click={() => editPart(part)}>Edit</button>
+                        <button class="bg-red-500 text-white px-2 py-1 rounded-md ml-2" on:click={() => deletePart(part.id)}>Delete</button>
+                    </div>
                 </li>
             {/each}
         </ul>

@@ -350,7 +350,7 @@
                                 {% for piesa in piese_inlocuite %}
                                 <tr>
                                     <td>{{ loop.index }}</td>
-                                    <td>{{ piesa.pn }}</td>
+                                    <td>{% if piesa.pn and not piesa.pn.startswith('NO-') %}{{ piesa.pn }}{% endif %}</td>
                                     <td>{{ piesa.descriere }}</td>
                                     <td style="text-align: center;">{{ piesa.buc }}</td>
                                 </tr>
@@ -374,7 +374,7 @@
                                 {% for piesa in piese_necesare %}
                                 <tr>
                                     <td>{{ loop.index }}</td>
-                                    <td>{{ piesa.pn }}</td>
+                                    <td>{% if piesa.pn and not piesa.pn.startswith('NO-') %}{{ piesa.pn }}{% endif %}</td>
                                     <td>{{ piesa.descriere }}</td>
                                     <td style="text-align: center;">{{ piesa.buc }}</td>
                                 </tr>
