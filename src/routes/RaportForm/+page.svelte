@@ -456,9 +456,9 @@
 				</div>
 			</div>
 			<div class="flex flex-col gap-4">
-	<div class="relative flex items-end gap-2">
-					<div class="flex-grow flex flex-col">
-						<label for="utilaj" class="font-bold text-sm mb-1 text-gray-700">Utilaj</label>
+				<div class="relative flex flex-col">
+					<label for="utilaj" class="font-bold text-sm mb-1 text-gray-700">Utilaj</label>
+					<div class="relative flex items-end gap-2">
 						<input
 							type="text"
 							id="utilaj"
@@ -487,7 +487,6 @@
 																			</li>									{/each}
 									</ul>
 								{/if}
-						</div>
 						<button type="button" onclick={async () => {
 							if (raport.client_id) {
 								const res = await fetch(`${API_BASE_URL}/client/${raport.client_id}/utilaje`);
@@ -511,6 +510,7 @@
 							{/each}
 						</ul>
 					{/if}
+				</div>
 				<div class="relative flex flex-col">
 					<label for="serie" class="font-bold text-sm mb-1 text-gray-700">Serie</label>
 					<input
