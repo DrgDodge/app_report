@@ -79,8 +79,7 @@
 	let pieseNecesare = $state<Piesa[]>([]);
 
 	let clientSugestii = $state<ClientSugestie[]>([]);
-	    let utilajSugestii = $state<string[]>([]);
-    let clientUtilaje = $state<UtilajSugestie[]>([]);
+	    	let utilajSugestii = $state<UtilajSugestie[]>([]);    let clientUtilaje = $state<UtilajSugestie[]>([]);
     let showClientUtilaje = $state(false);	let serieSugestii = $state<string[]>([]);
 	let pieseSugestii = $state<PiesaSugestie[]>([]);
 	let showClientSugestii = $state(false);
@@ -204,8 +203,9 @@
 		}, 300);
 	}
 
-	function selectUtilaj(sugestie: string) {
-		raport.utilaj = sugestie;
+	function selectUtilaj(sugestie: UtilajSugestie) {
+		raport.utilaj = sugestie.nume;
+		raport.serie = sugestie.serie;
 		utilajSugestii = [];
 		showUtilajSugestii = false;
 	}
@@ -475,14 +475,14 @@
 									class="absolute top-full left-0 right-0 bg-white border border-gray-300 border-t-0 rounded-b-md shadow-lg z-10 max-h-52 overflow-y-auto"
 									transition:fly={{ y: -5, duration: 200 }}
 								>
-									{#each utilajSugestii as sugestie (sugestie)}
+									{#each utilajSugestii as sugestie (sugestie.id)}
 										           <li>
 																				<button
 																					type="button"
 																					class="w-full text-left px-3 py-2 cursor-pointer hover:bg-gray-100"
 																					onclick={() => selectUtilaj(sugestie)}
 																				>
-																					{sugestie}
+																					{sugestie.nume}
 																				</button>
 																			</li>									{/each}
 									</ul>
