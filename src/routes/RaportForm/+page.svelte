@@ -143,7 +143,7 @@
 	            } catch (error) {
 	                console.error('Failed to fetch last report number:', error);
 	            }
-	        });	let allClients = $state<ClientSugestie[]>([]);
+	        });	
 	let clientDebounceTimer: number;
 	async function handleClientInput(e: Event) {
 		const input = e.target as HTMLInputElement;
