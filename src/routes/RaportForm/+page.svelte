@@ -665,75 +665,6 @@
 						class={inputClass}
 					></textarea>
 				</div>
-				<div class="grid grid-cols-2 gap-4">
-					<div class="flex flex-col">
-						<label for="observatii" class="font-bold text-sm mb-1 text-gray-700">OBS</label>
-						<textarea id="observatii" rows="10" bind:value={raport.observatii} class={inputClass}></textarea>
-					</div>
-					<div class="piese-section">
-						<div role="heading" aria-level="2" class="font-bold text-lg block mb-2">Manopera</div>
-						<table class="w-full border-collapse">
-							<thead class="bg-gray-100">
-								<tr>
-									<th class="border border-gray-300 p-1 text-left text-sm w-[70%]">Tip Manopera</th>
-									<th class="border border-gray-300 p-1 text-left text-sm w-[20%]">Ore</th>
-									<th class="border border-gray-300 p-1 text-left text-sm w-[10%]"></th>
-								</tr>
-							</thead>
-							<tbody>
-								{#each manoperaInregistrata as item, i (i)}
-									<tr>
-										<td class="border border-gray-300 p-1 relative">
-											<input
-												type="text"
-												bind:value={item.tip}
-												class={inputClassTable}
-												oninput={(e) => handleManoperaInput(e, i)}
-												onfocus={(e) => {
-													showManoperaSugestii = true;
-													activeManoperaIndex = i;
-													handleManoperaInput(e, i);
-												}}
-												onblur={() => setTimeout(() => (showManoperaSugestii = false), 200)}
-											/>
-											{#if showManoperaSugestii && activeManoperaIndex === i && manoperaSugestii.length > 0}
-												<ul
-													class="absolute top-full left-0 bg-white border border-gray-300 shadow-lg z-20 max-h-52 overflow-y-auto w-[300px]"
-												>
-													{#each manoperaSugestii as sugestie (sugestie)}
-														<div
-															role="button"
-															tabindex="0"
-															class="px-3 py-2 cursor-pointer hover:bg-gray-100"
-															onmousedown={() => selectManopera(sugestie, i)}
-														>
-															{sugestie}
-														</div>
-													{/each}
-												</ul>
-											{/if}
-										</td>
-										<td class="border border-gray-300 p-1">
-											<input type="number" step="0.5" bind:value={item.ore} class={inputClassTable} />
-										</td>
-										<td class="border border-gray-300 p-1">
-											<button
-												type="button"
-												class="w-full bg-red-100 text-red-800 hover:bg-red-200 font-semibold px-2 py-1 rounded-md"
-												onclick={() => removeManopera(i)}>X</button
-											>
-										</td>
-									</tr>
-								{/each}
-							</tbody>
-						</table>
-						<button
-							type="button"
-							class="bg-green-100 text-green-800 hover:bg-green-200 font-semibold px-2 py-1 rounded-md mt-2"
-							onclick={addManopera}>+ Adauga manopera</button
-						>
-					</div>
-				</div>
 			</div>
 
 			<div class="flex flex-col gap-4">
@@ -929,6 +860,86 @@
                     >
                 </div>
 			</div>
+		</div>
+
+		<div class="mt-5">
+			<table class="w-full border-collapse border border-gray-300">
+				<tbody>
+					<tr>
+						<td class="border border-gray-300 p-2 align-top w-1/2">
+							<div class="flex flex-col">
+								<label for="observatii" class="font-bold text-sm mb-1 text-gray-700">OBS</label>
+								<textarea id="observatii" rows="10" bind:value={raport.observatii} class={inputClass}></textarea>
+							</div>
+						</td>
+						<td class="border border-gray-300 p-2 align-top w-1/2">
+							<div class="piese-section">
+								<div role="heading" aria-level="2" class="font-bold text-lg block mb-2">Manopera</div>
+								<table class="w-full border-collapse">
+									<thead class="bg-gray-100">
+										<tr>
+											<th class="border border-gray-300 p-1 text-left text-sm w-[70%]">Tip Manopera</th>
+											<th class="border border-gray-300 p-1 text-left text-sm w-[20%]">Ore</th>
+											<th class="border border-gray-300 p-1 text-left text-sm w-[10%]"></th>
+										</tr>
+									</thead>
+									<tbody>
+										{#each manoperaInregistrata as item, i (i)}
+											<tr>
+												<td class="border border-gray-300 p-1 relative">
+													<input
+														type="text"
+														bind:value={item.tip}
+														class={inputClassTable}
+														oninput={(e) => handleManoperaInput(e, i)}
+														onfocus={(e) => {
+															showManoperaSugestii = true;
+															activeManoperaIndex = i;
+															handleManoperaInput(e, i);
+														}}
+														onblur={() => setTimeout(() => (showManoperaSugestii = false), 200)}
+													/>
+													{#if showManoperaSugestii && activeManoperaIndex === i && manoperaSugestii.length > 0}
+														<ul
+															class="absolute top-full left-0 bg-white border border-gray-300 shadow-lg z-20 max-h-52 overflow-y-auto w-[300px]"
+														>
+															{#each manoperaSugestii as sugestie (sugestie)}
+																<div
+																	role="button"
+																	tabindex="0"
+																	class="px-3 py-2 cursor-pointer hover:bg-gray-100"
+																	onmousedown={() => selectManopera(sugestie, i)}
+																>
+																	{sugestie}
+																</div>
+															{/each}
+														</ul>
+													{/if}
+												</td>
+												<td class="border border-gray-300 p-1">
+													<input type="number" step="0.5" bind:value={item.ore} class={inputClassTable} />
+												</td>
+												<td class="border border-gray-300 p-1">
+													<button
+														type="button"
+														class="w-full bg-red-100 text-red-800 hover:bg-red-200 font-semibold px-2 py-1 rounded-md"
+														onclick={() => removeManopera(i)}>X</button
+													>
+												</td>
+											</tr>
+										{/each}
+									</tbody>
+								</table>
+								<button
+									type="button"
+									class="bg-green-100 text-green-800 hover:bg-green-200 font-semibold px-2 py-1 rounded-md mt-2"
+									onclick={addManopera}>+ Adauga manopera</button
+								>
+							</div>
+						</td>
+					</tr>
+				</tbody>
+			</table>
 		</div>
 
 		<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-5 border-t border-gray-300 pt-5">
