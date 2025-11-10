@@ -386,36 +386,43 @@
             </tr>
             <tr>
                 <td colspan="2">
-                    <div class="form-section">
-                        <span class="form-label">OBS:</span>
-                        <div class="form-text-box" style="min-height: 60px;">
-                            {{ raport.observatii | default('', true) }}
-                        </div>
-                    </div>
-
-                    <div class="form-section" style="margin-top: 15px;">
-                        <span class="form-label">Manopera:</span>
-                        <table class="parts-table">
-                            <thead>
-                                <tr>
-                                    <th style="width: 80%;">Tip Manopera</th>
-                                    <th style="width: 20%; text-align: center;">Ore</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for item in manopera %}
-                                <tr>
-                                    <td>{{ item.tip }}</td>
-                                    <td style="text-align: center;">{{ item.ore }}</td>
-                                </tr>
-                                {% endfor %}
-                                <tr>
-                                    <td style="text-align: right; font-weight: bold; background-color: #f0f0f0;">Total Manopera (ore)</td>
-                                    <td style="text-align: center; font-weight: bold;">{{ raport.manopera_ore }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <tr>
+                            <td style="width: 50%; vertical-align: top; padding-right: 10px;">
+                                <div class="form-section">
+                                    <span class="form-label">OBS:</span>
+                                    <div class="form-text-box" style="min-height: 150px;">
+                                        {{ raport.observatii | default('', true) }}
+                                    </div>
+                                </div>
+                            </td>
+                            <td style="width: 50%; vertical-align: top; padding-left: 10px;">
+                                <div class="form-section">
+                                    <span class="form-label">Manopera:</span>
+                                    <table class="parts-table">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 80%;">Tip Manopera</th>
+                                                <th style="width: 20%; text-align: center;">Ore</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for item in manopera %}
+                                            <tr>
+                                                <td>{{ item.tip }}</td>
+                                                <td style="text-align: center;">{{ item.ore }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                            <tr>
+                                                <td style="text-align: right; font-weight: bold; background-color: #f0f0f0;">Total Manopera (ore)</td>
+                                                <td style="text-align: center; font-weight: bold;">{{ raport.manopera_ore }}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
 
                     <table class="summary-table" style="margin-top: 15px; width: 100%;">
                         <tr>
