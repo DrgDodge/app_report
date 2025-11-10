@@ -216,13 +216,18 @@ def create_raport():
         # Pas 3: Insereaza piesele inlocuite
         logging.debug(f"Saving {len(piese_inlocuite)} inlocuite parts for raport {raport_id}")
         for piesa in piese_inlocuite:
-            logging.debug(f"Saving piesa inlocuita: {piesa}")
             if piesa.get('pn') or piesa.get('descriere'):
                 pn = piesa.get('pn')
                 descriere = piesa.get('descriere', '')
                 if not pn and descriere:
-                    import time
-                    pn = f"NO-{descriere[:10]}-{int(time.time() * 1000)}" # Create a unique PN
+                    # Check if a part with this description exists
+                    cursor.execute("SELECT pn FROM PieseMaster WHERE descriere = ?", (descriere,))
+                    row = cursor.fetchone()
+                    if row:
+                        pn = row['pn']
+                    else:
+                        import time
+                        pn = f"NO-{descriere[:10]}-{int(time.time() * 1000)}" # Create a unique PN
 
                 if pn:
                     cursor.execute("INSERT OR IGNORE INTO PieseMaster (pn, descriere) VALUES (?, ?)", 
@@ -244,8 +249,14 @@ def create_raport():
                 pn = piesa.get('pn')
                 descriere = piesa.get('descriere', '')
                 if not pn and descriere:
-                    import time
-                    pn = f"NO-{descriere[:10]}-{int(time.time() * 1000)}" # Create a unique PN
+                    # Check if a part with this description exists
+                    cursor.execute("SELECT pn FROM PieseMaster WHERE descriere = ?", (descriere,))
+                    row = cursor.fetchone()
+                    if row:
+                        pn = row['pn']
+                    else:
+                        import time
+                        pn = f"NO-{descriere[:10]}-{int(time.time() * 1000)}" # Create a unique PN
 
                 if pn:
                     cursor.execute("INSERT OR IGNORE INTO PieseMaster (pn, descriere) VALUES (?, ?)", 
