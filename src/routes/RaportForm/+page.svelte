@@ -191,16 +191,28 @@
 		raport.utilaj = input.value;
 		showUtilajSugestii = true;
 
-		clearTimeout(utilajDebounceTimer);
-		if (raport.utilaj.length < 1) {
+		if (!raport.client_id) {
 			utilajSugestii = [];
 			return;
 		}
 
+		// Fetch utilaje for the client if not already fetched or if client has changed
+		if (clientUtilaje.length === 0) {
+			const res = await fetch(`${API_BASE_URL}/client/${raport.client_id}/utilaje`);
+			if (res.ok) {
+				clientUtilaje = await res.json();
+			}
+		}
+		
+		clearTimeout(utilajDebounceTimer);
+		if (raport.utilaj.length < 1) {
+			utilajSugestii = clientUtilaje; // Show all if input is empty
+			return;
+		}
+
 		utilajDebounceTimer = setTimeout(async () => {
-			const res = await fetch(`${API_BASE_URL}/search/utilaje?q=${raport.utilaj}`);
-			utilajSugestii = await res.json();
-		}, 300);
+			utilajSugestii = clientUtilaje.filter(u => u.nume.toLowerCase().includes(raport.utilaj.toLowerCase()));
+		}, 100);
 	}
 
 	function selectUtilaj(sugestie: UtilajSugestie) {
