@@ -217,13 +217,13 @@ def create_raport():
         logging.debug(f"Saving {len(piese_inlocuite)} inlocuite parts for raport {raport_id}")
         for piesa in piese_inlocuite:
             logging.debug(f"Saving piesa inlocuita: {piesa}")
-            if piesa.get('pn') or piesa.get('descriere'): # Adauga doar daca e ceva completat
-                # Check if part exists in PieseMaster
-                cursor.execute("SELECT id FROM PieseMaster WHERE pn = ?", (piesa.get('pn'),))
-                row = cursor.fetchone()
-                if not row:
-                    # Insert into PieseMaster
-                    cursor.execute("INSERT OR IGNORE INTO PieseMaster (pn, descriere) VALUES (?, ?)", (piesa.get('pn'), piesa.get('descriere')))
+            if piesa.get('pn') or piesa.get('descriere'):
+                if piesa.get('pn'):
+                    cursor.execute("INSERT OR IGNORE INTO PieseMaster (pn, descriere) VALUES (?, ?)", 
+                                   (piesa.get('pn'), piesa.get('descriere', '')))
+                    if piesa.get('descriere'):
+                        cursor.execute("UPDATE PieseMaster SET descriere = ? WHERE pn = ?", 
+                                       (piesa.get('descriere'), piesa.get('pn')))
 
                 cursor.execute("""
                     INSERT INTO PieseInlocuite (raport_id, pn, descriere, buc)
@@ -235,12 +235,12 @@ def create_raport():
         for piesa in piese_necesare:
             logging.debug(f"Saving piesa necesara: {piesa}")
             if piesa.get('pn') or piesa.get('descriere'):
-                # Check if part exists in PieseMaster
-                cursor.execute("SELECT id FROM PieseMaster WHERE pn = ?", (piesa.get('pn'),))
-                row = cursor.fetchone()
-                if not row:
-                    # Insert into PieseMaster
-                    cursor.execute("INSERT OR IGNORE INTO PieseMaster (pn, descriere) VALUES (?, ?)", (piesa.get('pn'), piesa.get('descriere')))
+                if piesa.get('pn'):
+                    cursor.execute("INSERT OR IGNORE INTO PieseMaster (pn, descriere) VALUES (?, ?)", 
+                                   (piesa.get('pn'), piesa.get('descriere', '')))
+                    if piesa.get('descriere'):
+                        cursor.execute("UPDATE PieseMaster SET descriere = ? WHERE pn = ?", 
+                                       (piesa.get('descriere'), piesa.get('pn')))
 
                 cursor.execute("""
                     INSERT INTO PieseNecesare (raport_id, pn, descriere, buc)
