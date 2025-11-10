@@ -6,6 +6,9 @@ from flask_cors import CORS
 from weasyprint import HTML
 import os
 import tempfile
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
 
 app = Flask(__name__)
 # Permite cereri de la Svelte (de pe alt port/domeniu)
@@ -211,7 +214,9 @@ def create_raport():
             raport_id = cursor.lastrowid # Aflam ID-ul raportului proaspat creat
         
         # Pas 3: Insereaza piesele inlocuite
+        logging.debug(f"Saving {len(piese_inlocuite)} inlocuite parts for raport {raport_id}")
         for piesa in piese_inlocuite:
+            logging.debug(f"Saving piesa inlocuita: {piesa}")
             if piesa.get('pn') or piesa.get('descriere'): # Adauga doar daca e ceva completat
                 # Check if part exists in PieseMaster
                 cursor.execute("SELECT id FROM PieseMaster WHERE pn = ?", (piesa.get('pn'),))
@@ -226,8 +231,10 @@ def create_raport():
                 """, (raport_id, piesa.get('pn'), piesa.get('descriere'), piesa.get('buc')))
         
         # Pas 4: Insereaza piesele necesare
+        logging.debug(f"Saving {len(piese_necesare)} necesare parts for raport {raport_id}")
         for piesa in piese_necesare:
-             if piesa.get('pn') or piesa.get('descriere'):
+            logging.debug(f"Saving piesa necesara: {piesa}")
+            if piesa.get('pn') or piesa.get('descriere'):
                 # Check if part exists in PieseMaster
                 cursor.execute("SELECT id FROM PieseMaster WHERE pn = ?", (piesa.get('pn'),))
                 row = cursor.fetchone()
@@ -248,7 +255,12 @@ def create_raport():
                     VALUES (?, ?, ?)
                 """, (raport_id, item.get('tip'), item.get('ore')))
 
-        # Pas 6: Salveaza istoricul orelor de functionare
+        # Pas 6: Salveaza noua destinatie
+        destinatie = raport.get('destinatie')
+        if destinatie:
+            cursor.execute("INSERT OR IGNORE INTO Destinatii (nume) VALUES (?)", (destinatie,))
+
+        # Pas 7: Salveaza istoricul orelor de functionare
         try:
             if raport.get('utilaj') and raport.get('serie') and client_id:
                 client_id_int = int(client_id)
@@ -367,6 +379,20 @@ def get_report_pdf(raport_id):
         # Log the exception for debugging
         print(f"Error generating PDF: {e}")
         return jsonify({"success": False, "message": str(e)}), 500
+
+@app.route('/api/search/destinatii', methods=['GET'])
+def search_destinatii():
+    """ Cauta destinatii pentru autocomplete """
+    query = request.args.get('q', '')
+    conn = get_db_conn()
+    cursor = conn.cursor()
+    if not query:
+        cursor.execute("SELECT nume FROM Destinatii ORDER BY nume LIMIT 20")
+    else:
+        cursor.execute("SELECT nume FROM Destinatii WHERE nume LIKE ? LIMIT 10", (f'%{query}%',))
+    destinatii = [row['nume'] for row in cursor.fetchall()]
+    conn.close()
+    return jsonify(destinatii)
 
 @app.route('/api/search/utilaje', methods=['GET'])
 def search_utilaje():

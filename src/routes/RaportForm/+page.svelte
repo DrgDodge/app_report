@@ -116,6 +116,25 @@
 	let activeDescriereIndex = $state<number | null>(null);
 	let activeDescriereTip = $state<'inlocuite' | 'necesare'>('inlocuite');
 	
+	let destinatieSugestii = $state<string[]>([]);
+	let showDestinatieSugestii = $state(false);
+
+	async function handleDestinatieInput(e: Event) {
+		const input = e.target as HTMLInputElement;
+		raport.destinatie = input.value;
+		showDestinatieSugestii = true;
+
+		const res = await fetch(`${API_BASE_URL}/search/destinatii?q=${raport.destinatie}`);
+		if (res.ok) {
+			destinatieSugestii = await res.json();
+		}
+	}
+
+	function selectDestinatie(sugestie: string) {
+		raport.destinatie = sugestie;
+		showDestinatieSugestii = false;
+	}
+	
 	const tipuriManopera = [
 		'Electrica',
 		'Hidraulica',
@@ -947,9 +966,32 @@
 				<label for="plecare" class="font-bold text-sm mb-1 text-gray-700">Plecare</label>
 				<input type="text" id="plecare" bind:value={raport.plecare} class={inputClass} />
 			</div>
-			<div class="flex flex-col">
+			<div class="flex flex-col relative">
 				<label for="destinatie" class="font-bold text-sm mb-1 text-gray-700">Destinatie</label>
-				<input type="text" id="destinatie" bind:value={raport.destinatie} class={inputClass} />
+				<input
+					type="text"
+					id="destinatie"
+					bind:value={raport.destinatie}
+					class={inputClass}
+					oninput={handleDestinatieInput}
+					onblur={() => setTimeout(() => (showDestinatieSugestii = false), 200)}
+					onfocus={handleDestinatieInput}
+					autocomplete="off"
+				/>
+				{#if showDestinatieSugestii && destinatieSugestii.length > 0}
+					<ul class="absolute top-full left-0 right-0 bg-white border border-gray-300 border-t-0 rounded-b-md shadow-lg z-10 max-h-52 overflow-y-auto">
+						{#each destinatieSugestii as sugestie (sugestie)}
+							<div
+								role="button"
+								tabindex="0"
+								class="px-3 py-2 cursor-pointer hover:bg-gray-100"
+								onmousedown={() => selectDestinatie(sugestie)}
+							>
+								{sugestie}
+							</div>
+						{/each}
+					</ul>
+				{/if}
 			</div>
 			<div class="flex items-end gap-4">
 				<div class="flex-grow">

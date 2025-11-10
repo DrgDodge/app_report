@@ -98,6 +98,11 @@ CREATE TABLE IF NOT EXISTS Manopera (
     FOREIGN KEY (raport_id) REFERENCES Rapoarte(id)
 );
 
+CREATE TABLE IF NOT EXISTS Destinatii (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nume TEXT NOT NULL UNIQUE
+);
+
 -- Introducem cativa clienti si piese de test
 INSERT OR IGNORE INTO Clienti (nume, cui) VALUES ('Client Exemplu SRL', 'RO123456');
 INSERT OR IGNORE INTO Clienti (nume, cui) VALUES ('Alt Client SA', 'RO654321');
