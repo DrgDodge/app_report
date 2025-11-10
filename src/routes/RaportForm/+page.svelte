@@ -10,6 +10,11 @@
 		buc: number | null;
 	}
 
+	interface Manopera {
+		tip: string;
+		ore: number | null;
+	}
+
 	    interface Raport {
 			numar: string;
 			tehnician: string;
@@ -79,6 +84,7 @@
 
 	let pieseInlocuite = $state<Piesa[]>([]);
 	let pieseNecesare = $state<Piesa[]>([]);
+	let manoperaInregistrata = $state<Manopera[]>([]);
 
 	let allClients = $state<ClientSugestie[]>([]);
 	let allParts = $state<PiesaSugestie[]>([]);
@@ -104,6 +110,19 @@
 	let activeDescriereIndex = $state<number | null>(null);
 	let activeDescriereTip = $state<'inlocuite' | 'necesare'>('inlocuite');
 	
+	const tipuriManopera = [
+		'Electrica',
+		'Hidraulica',
+		'Mecanica Motor',
+		'Transmisii',
+		'Mecanica Motor Garantie',
+		'Diagnoza',
+		'Pneumatica'
+	];
+	let manoperaSugestii = $state<string[]>([]);
+	let showManoperaSugestii = $state(false);
+	let activeManoperaIndex = $state<number | null>(null);
+
 	    		
 	
 
@@ -122,8 +141,34 @@
 	        pieseNecesare.splice(index, 1);
 	    }
 
+		function addManopera() {
+			manoperaInregistrata = [...manoperaInregistrata, { tip: '', ore: null }];
+		}
+		function removeManopera(index: number) {
+			manoperaInregistrata.splice(index, 1);
+		}
+
 		function copyToNecesare(piesa: Piesa) {
 			pieseNecesare = [...pieseNecesare, { ...piesa }];
+		}
+
+		function handleManoperaInput(e: Event, index: number) {
+			const input = e.target as HTMLInputElement;
+			const query = input.value;
+			manoperaInregistrata[index].tip = query;
+			showManoperaSugestii = true;
+			activeManoperaIndex = index;
+
+			if (query.length === 0) {
+				manoperaSugestii = tipuriManopera;
+			} else {
+				manoperaSugestii = tipuriManopera.filter(t => t.toLowerCase().includes(query.toLowerCase()));
+			}
+		}
+
+		function selectManopera(sugestie: string, index: number) {
+			manoperaInregistrata[index].tip = sugestie;
+			showManoperaSugestii = false;
 		}
 	
 	    // --- Functii Autocomplete ---
@@ -381,7 +426,8 @@
 		const dataToSubmit = {
 			raport: raport,
 			pieseInlocuite: pieseInlocuite,
-			pieseNecesare: pieseNecesare
+			pieseNecesare: pieseNecesare,
+			manopera: manoperaInregistrata
 		};
 
 		try {
@@ -624,6 +670,70 @@
 			</div>
 
 			<div class="flex flex-col gap-4">
+				<div class="piese-section">
+					<div role="heading" aria-level="2" class="font-bold text-lg block mb-2">Manopera</div>
+					<table class="w-full border-collapse">
+						<thead class="bg-gray-100">
+							<tr>
+								<th class="border border-gray-300 p-1 text-left text-sm w-[70%]">Tip Manopera</th>
+								<th class="border border-gray-300 p-1 text-left text-sm w-[20%]">Ore</th>
+								<th class="border border-gray-300 p-1 text-left text-sm w-[10%]"></th>
+							</tr>
+						</thead>
+						<tbody>
+							{#each manoperaInregistrata as item, i (i)}
+								<tr>
+									<td class="border border-gray-300 p-1 relative">
+										<input
+											type="text"
+											bind:value={item.tip}
+											class={inputClassTable}
+											oninput={(e) => handleManoperaInput(e, i)}
+											onfocus={(e) => {
+												showManoperaSugestii = true;
+												activeManoperaIndex = i;
+												handleManoperaInput(e, i);
+											}}
+											onblur={() => setTimeout(() => (showManoperaSugestii = false), 200)}
+										/>
+										{#if showManoperaSugestii && activeManoperaIndex === i && manoperaSugestii.length > 0}
+											<ul
+												class="absolute top-full left-0 bg-white border border-gray-300 shadow-lg z-20 max-h-52 overflow-y-auto w-[300px]"
+											>
+												{#each manoperaSugestii as sugestie (sugestie)}
+													<div
+														role="button"
+														tabindex="0"
+														class="px-3 py-2 cursor-pointer hover:bg-gray-100"
+														onmousedown={() => selectManopera(sugestie, i)}
+													>
+														{sugestie}
+													</div>
+												{/each}
+											</ul>
+										{/if}
+									</td>
+									<td class="border border-gray-300 p-1">
+										<input type="number" step="0.5" bind:value={item.ore} class={inputClassTable} />
+									</td>
+									<td class="border border-gray-300 p-1">
+										<button
+											type="button"
+											class="w-full bg-red-100 text-red-800 hover:bg-red-200 font-semibold px-2 py-1 rounded-md"
+											onclick={() => removeManopera(i)}>X</button
+										>
+									</td>
+								</tr>
+							{/each}
+						</tbody>
+					</table>
+					<button
+						type="button"
+						class="bg-green-100 text-green-800 hover:bg-green-200 font-semibold px-2 py-1 rounded-md mt-2"
+						onclick={addManopera}>+ Adauga manopera</button
+					>
+				</div>
+
 				<div class="piese-section">
 					                    <div role="heading" aria-level="2" class="font-bold text-lg block mb-2">Piese inlocuite</div>
 					                    <table class="w-full border-collapse">

@@ -336,6 +336,26 @@
                     <hr style="border: 0; border-top: 1px solid #ccc; margin: 15px 0;">
 
                     <div class="form-section">
+                        <span class="form-label">Manopera:</span>
+                        <table class="parts-table">
+                            <thead>
+                                <tr>
+                                    <th class="col-desc">Tip Manopera</th>
+                                    <th class="col-buc">Ore</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in manopera %}
+                                <tr>
+                                    <td>{{ item.tip }}</td>
+                                    <td style="text-align: center;">{{ item.ore }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="form-section">
                         <span class="form-label">Piese inlocuite:</span>
                         <table class="parts-table">
                             <thead>
