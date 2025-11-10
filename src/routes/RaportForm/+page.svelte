@@ -141,7 +141,8 @@
 	            } catch (error) {
 	                console.error('Failed to fetch last report number:', error);
 	            }
-	        });	let clientDebounceTimer: number;
+	        });	let allClients = $state<ClientSugestie[]>([]);
+	let clientDebounceTimer: number;
 	async function handleClientInput(e: Event) {
 		const input = e.target as HTMLInputElement;
 		raport.client = input.value;
@@ -149,16 +150,23 @@
 		raport.client_id = null; // Resetam ID-ul daca utilizatorul editeaza manual
 		showClientSugestii = true;
 
+		// Fetch all clients if not already fetched
+		if (allClients.length === 0) {
+			const res = await fetch(`${API_BASE_URL}/clients`);
+			if (res.ok) {
+				allClients = await res.json();
+			}
+		}
+
 		clearTimeout(clientDebounceTimer);
 		if (raport.client.length < 1) {
-			clientSugestii = [];
+			clientSugestii = allClients; // Show all if input is empty
 			return;
 		}
 
-		clientDebounceTimer = setTimeout(async () => {
-			const res = await fetch(`${API_BASE_URL}/search/clienti?q=${raport.client}`);
-			clientSugestii = await res.json();
-		}, 300); // Asteapta 300ms inainte de a cauta
+		clientDebounceTimer = setTimeout(() => {
+			clientSugestii = allClients.filter(c => c.nume.toLowerCase().includes(raport.client.toLowerCase()));
+		}, 100);
 	}
 
 	async function selectClient(sugestie: ClientSugestie) {
