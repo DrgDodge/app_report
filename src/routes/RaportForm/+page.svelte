@@ -1081,12 +1081,25 @@
 		                    const raportId = e.detail;
 		                    const res = await fetch(`${API_BASE_URL}/raport/${raportId}`);
 		                    if(res.ok) {
-		                        		                const data = await res.json();
-		                        		                raport = data.raport;
-		                        		                pieseInlocuite = data.pieseInlocuite;
-		                        		                pieseNecesare = data.pieseNecesare;
-		                        		                manoperaInregistrata = data.manopera;
-		                        		                showReportHistory = false;		                    }
+		                        		                		                const data = await res.json();
+		                        		                		                raport = data.raport;
+		                        		                
+		                        		                						data.pieseInlocuite.forEach(p => {
+		                        		                							if (p.pn && p.pn.startsWith('NO-')) {
+		                        		                								p.pn = '';
+		                        		                							}
+		                        		                						});
+		                        		                		                pieseInlocuite = data.pieseInlocuite;
+		                        		                
+		                        		                						data.pieseNecesare.forEach(p => {
+		                        		                							if (p.pn && p.pn.startsWith('NO-')) {
+		                        		                								p.pn = '';
+		                        		                							}
+		                        		                						});
+		                        		                		                pieseNecesare = data.pieseNecesare;
+		                        		                
+		                        		                		                manoperaInregistrata = data.manopera;
+		                        		                		                showReportHistory = false;		                    }
 		                }}		        on:delete={async (e) => {
 		            const raportId = e.detail;
 		            if(confirm('Sunteti sigur ca doriti sa stergeti acest raport?')){
