@@ -432,8 +432,9 @@
 											bind:value={raport.client}
 											class={inputClass}
 																			oninput={handleClientInput}							onblur={() => setTimeout(() => (showClientSugestii = false), 200)}
-												onfocus={() => {
+												onfocus={(e) => {
 												showClientSugestii = true;
+												handleClientInput(e);
 											}}
 											autocomplete="off"
 										/>
@@ -485,8 +486,9 @@
 							bind:value={raport.utilaj}
 							class={inputClass}
 															oninput={handleUtilajInput}						onblur={() => setTimeout(() => (showUtilajSugestii = false), 200)}
-								onfocus={() => {
+								onfocus={(e) => {
 									showUtilajSugestii = true;
+									handleUtilajInput(e);
 								}}
 								autocomplete="off"
 							/>
