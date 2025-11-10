@@ -951,13 +951,15 @@
 				<label for="destinatie" class="font-bold text-sm mb-1 text-gray-700">Destinatie</label>
 				<input type="text" id="destinatie" bind:value={raport.destinatie} class={inputClass} />
 			</div>
-			<div class="flex flex-col">
-				<label for="km" class="font-bold text-sm mb-1 text-gray-700">Km efectuati</label>
-				<input type="number" id="km" bind:value={raport.km_efectuati} class={inputClass} />
-			</div>
-			<div class="flex items-center gap-2 mt-5">
-				<input type="checkbox" id="retur" bind:checked={raport.retur} class="h-4 w-4" />
-				<label for="retur" class="font-bold text-sm text-gray-700">Retur</label>
+			<div class="flex items-end gap-4">
+				<div class="flex-grow">
+					<label for="km" class="font-bold text-sm mb-1 text-gray-700">Km efectuati</label>
+					<input type="number" id="km" bind:value={raport.km_efectuati} class={inputClass} />
+				</div>
+				<div class="flex items-center gap-2 pb-2">
+					<input type="checkbox" id="retur" bind:checked={raport.retur} class="h-4 w-4" />
+					<label for="retur" class="font-bold text-sm text-gray-700">Retur</label>
+				</div>
 			</div>
 		</div>
 
