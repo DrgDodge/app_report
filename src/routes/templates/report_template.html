@@ -386,48 +386,47 @@
             </tr>
             <tr>
                 <td colspan="2">
-                    <table class="obs-summary-table">
+                    <div class="form-section">
+                        <span class="form-label">OBS:</span>
+                        <div class="form-text-box" style="min-height: 60px;">
+                            {{ raport.observatii | default('', true) }}
+                        </div>
+                    </div>
+
+                    <div class="form-section" style="margin-top: 15px;">
+                        <span class="form-label">Manopera:</span>
+                        <table class="parts-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 80%;">Tip Manopera</th>
+                                    <th style="width: 20%; text-align: center;">Ore</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in manopera %}
+                                <tr>
+                                    <td>{{ item.tip }}</td>
+                                    <td style="text-align: center;">{{ item.ore }}</td>
+                                </tr>
+                                {% endfor %}
+                                <tr>
+                                    <td style="text-align: right; font-weight: bold; background-color: #f0f0f0;">Total Manopera (ore)</td>
+                                    <td style="text-align: center; font-weight: bold;">{{ raport.manopera_ore }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <table class="summary-table" style="margin-top: 15px; width: 100%;">
                         <tr>
-                            <td class="obs-cell">
-                                <div class="form-section">
-                                    <span class="form-label">OBS:</span>
-                                    <div class="form-text-box" style="min-height: 100px;">
-                                        {{ raport.observatii | default('', true) }}
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="summary-cell">
-                                <div class="form-section">
-                                    <table class="summary-table">
-                                        {% for item in manopera %}
-                                        <tr>
-                                            <td class="label">{{ item.tip }}</td>
-                                            <td>{{ item.ore }}</td>
-                                        </tr>
-                                        {% endfor %}
-                                        <tr>
-                                            <td class="label">Total Manopera (ore)</td>
-                                            <td>{{ raport.manopera_ore }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="label">Km efectuati</td>
-                                            <td>{{ raport.km_efectuati }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="label">Plecare</td>
-                                            <td>{{ raport.plecare }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="label">Destinatie</td>
-                                            <td>{{ raport.destinatie }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="label">Retur</td>
-                                            <td>{% if raport.retur %}Da{% else %}Nu{% endif %}</td>
-                                        </tr>
-                                    </table>
-                               </div>
-                            </td>
+                            <td class="label" style="width: 10%;">Plecare</td>
+                            <td style="width: 20%;">{{ raport.plecare }}</td>
+                            <td class="label" style="width: 10%;">Destinatie</td>
+                            <td style="width: 20%;">{{ raport.destinatie }}</td>
+                            <td class="label" style="width: 12%;">Km efectuati</td>
+                            <td style="width: 13%;">{{ raport.km_efectuati }}</td>
+                            <td class="label" style="width: 8%;">Retur</td>
+                            <td style="width: 7%;">{% if raport.retur %}Da{% else %}Nu{% endif %}</td>
                         </tr>
                     </table>
                 </td>
