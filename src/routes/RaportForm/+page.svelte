@@ -1059,13 +1059,12 @@
 		                    const raportId = e.detail;
 		                    const res = await fetch(`${API_BASE_URL}/raport/${raportId}`);
 		                    if(res.ok) {
-		                        const data = await res.json();
-		                        raport = data.raport;
-		                        raport.client = data.raport.client_nume_text;
-		                        pieseInlocuite = data.pieseInlocuite;
-		                        pieseNecesare = data.pieseNecesare;
-		                        showReportHistory = false;
-		                    }
+		                        		                const data = await res.json();
+		                        		                raport = data.raport;
+		                        		                pieseInlocuite = data.pieseInlocuite;
+		                        		                pieseNecesare = data.pieseNecesare;
+		                        		                manoperaInregistrata = data.manopera;
+		                        		                showReportHistory = false;		                    }
 		                }}		        on:delete={async (e) => {
 		            const raportId = e.detail;
 		            if(confirm('Sunteti sigur ca doriti sa stergeti acest raport?')){

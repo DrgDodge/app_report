@@ -619,16 +619,46 @@ def get_raport(raport_id):
     
     cursor.execute("SELECT * FROM PieseNecesare WHERE raport_id = ?", (raport_id,))
     piese_necesare_data = cursor.fetchall()
+
+    cursor.execute("SELECT * FROM Manopera WHERE raport_id = ?", (raport_id,))
+    manopera_data = cursor.fetchall()
     conn.close()
 
-    raport = dict(raport_data)
+    raport_dict = dict(raport_data)
+    raport = {
+        'id': raport_dict.get('id'),
+        'numar': raport_dict.get('numar_raport'),
+        'tehnician': raport_dict.get('tehnician'),
+        'data': raport_dict.get('data'),
+        'este_revizie': raport_dict.get('este_revizie'),
+        'este_reparatie': raport_dict.get('este_reparatie'),
+        'este_constatare': raport_dict.get('este_constatare'),
+        'este_garantie': raport_dict.get('este_garantie'),
+        'client_id': raport_dict.get('client_id'),
+        'client': raport_dict.get('client_nume_text'),
+        'locatie': raport_dict.get('locatie'),
+        'solicitare_client': raport_dict.get('solicitare_client'),
+        'utilaj': raport_dict.get('utilaj'),
+        'serie': raport_dict.get('serie_utilaj'),
+        'ore_funct': raport_dict.get('ore_funct'),
+        'operatii_efectuate': raport_dict.get('operatii_efectuate'),
+        'observatii': raport_dict.get('observatii'),
+        'manopera_ore': raport_dict.get('manopera_ore'),
+        'km_efectuati': raport_dict.get('km_efectuati'),
+        'nume_semnatura_client': raport_dict.get('nume_semnatura_client'),
+        'plecare': raport_dict.get('plecare', ''),
+        'destinatie': raport_dict.get('destinatie', ''),
+        'retur': raport_dict.get('retur', False)
+    }
     piese_inlocuite = [dict(p) for p in piese_inlocuite_data]
     piese_necesare = [dict(p) for p in piese_necesare_data]
+    manopera = [dict(m) for m in manopera_data]
 
     return jsonify({
         'raport': raport,
         'pieseInlocuite': piese_inlocuite,
-        'pieseNecesare': piese_necesare
+        'pieseNecesare': piese_necesare,
+        'manopera': manopera
     })
 
 @app.route('/api/clients', methods=['GET'])
