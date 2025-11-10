@@ -229,7 +229,7 @@ def create_raport():
         for piesa in piese_necesare:
              if piesa.get('pn') or piesa.get('descriere'):
                 # Check if part exists in PieseMaster
-                cursor.execute("SELECT id FROM PieseMaster WHERE pn = ?", (pesa.get('pn'),))
+                cursor.execute("SELECT id FROM PieseMaster WHERE pn = ?", (piesa.get('pn'),))
                 row = cursor.fetchone()
                 if not row:
                     # Insert into PieseMaster
