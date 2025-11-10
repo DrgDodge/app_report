@@ -63,6 +63,9 @@ CREATE TABLE IF NOT EXISTS Rapoarte (
     km_efectuati INTEGER,
     
     nume_semnatura_client TEXT,
+    plecare TEXT,
+    destinatie TEXT,
+    retur INTEGER,
     
     FOREIGN KEY (client_id) REFERENCES Clienti(id)
 );
@@ -84,6 +87,14 @@ CREATE TABLE IF NOT EXISTS PieseNecesare (
     pn TEXT,
     descriere TEXT,
     buc INTEGER,
+    FOREIGN KEY (raport_id) REFERENCES Rapoarte(id)
+);
+
+CREATE TABLE IF NOT EXISTS Manopera (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    raport_id INTEGER NOT NULL,
+    tip TEXT,
+    ore REAL,
     FOREIGN KEY (raport_id) REFERENCES Rapoarte(id)
 );
 

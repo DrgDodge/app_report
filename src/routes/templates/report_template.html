@@ -413,6 +413,18 @@
                                             <td class="label">Km efectuati</td>
                                             <td>{{ raport.km_efectuati }}</td>
                                         </tr>
+                                        <tr>
+                                            <td class="label">Plecare</td>
+                                            <td>{{ raport.plecare }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="label">Destinatie</td>
+                                            <td>{{ raport.destinatie }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="label">Retur</td>
+                                            <td>{% if raport.retur %}Da{% else %}Nu{% endif %}</td>
+                                        </tr>
                                     </table>
                                </div>
                             </td>

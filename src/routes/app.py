@@ -11,7 +11,7 @@ app = Flask(__name__)
 # Permite cereri de la Svelte (de pe alt port/domeniu)
 CORS(app, resources={r"/api/*": {"origins": "*"}}) 
 
-DATABASE = 'date.db'
+DATABASE = os.path.join(os.path.dirname(__file__), 'date.db')
 
 def get_db_conn():
     """ Functie helper pentru conexiunea la DB """
@@ -134,6 +134,7 @@ def create_raport():
     raport = data['raport']
     piese_inlocuite = data['pieseInlocuite']
     piese_necesare = data['pieseNecesare']
+    manopera = data['manopera']
     raport_id = raport.get('id')
     
     conn = get_db_conn()
@@ -164,7 +165,8 @@ def create_raport():
                 UPDATE Rapoarte SET
                     numar_raport = ?, tehnician = ?, data = ?, este_revizie = ?, este_reparatie = ?, este_constatare = ?, este_garantie = ?,
                     client_id = ?, client_nume_text = ?, locatie = ?, solicitare_client = ?, utilaj = ?, serie_utilaj = ?, ore_funct = ?,
-                    operatii_efectuate = ?, observatii = ?, manopera_ore = ?, km_efectuati = ?, nume_semnatura_client = ?
+                    operatii_efectuate = ?, observatii = ?, manopera_ore = ?, km_efectuati = ?, nume_semnatura_client = ?,
+                    plecare = ?, destinatie = ?, retur = ?
                 WHERE id = ?
             """, (
                 raport.get('numar'), raport.get('tehnician'), raport.get('data'),
@@ -175,19 +177,24 @@ def create_raport():
                 raport.get('operatii_efectuate'), raport.get('observatii'),
                 raport.get('manopera_ore'), raport.get('km_efectuati'),
                 raport.get('nume_semnatura_client'),
+                raport.get('plecare'),
+                raport.get('destinatie'),
+                raport.get('retur'),
                 raport_id
             ))
             # Sterge piesele vechi
             cursor.execute("DELETE FROM PieseInlocuite WHERE raport_id = ?", (raport_id,))
             cursor.execute("DELETE FROM PieseNecesare WHERE raport_id = ?", (raport_id,))
+            cursor.execute("DELETE FROM Manopera WHERE raport_id = ?", (raport_id,))
         else:
             # Pas 2: Insereaza raportul principal
             cursor.execute("""
                 INSERT INTO Rapoarte (
                     numar_raport, tehnician, data, este_revizie, este_reparatie, este_constatare, este_garantie,
                     client_id, client_nume_text, locatie, solicitare_client, utilaj, serie_utilaj, ore_funct,
-                    operatii_efectuate, observatii, manopera_ore, km_efectuati, nume_semnatura_client
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    operatii_efectuate, observatii, manopera_ore, km_efectuati, nume_semnatura_client,
+                    plecare, destinatie, retur
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 raport.get('numar'), raport.get('tehnician'), raport.get('data'),
                 raport.get('este_revizie', 0), raport.get('este_reparatie', 0),
@@ -196,7 +203,10 @@ def create_raport():
                 raport.get('utilaj'), raport.get('serie'), raport.get('ore_funct'),
                 raport.get('operatii_efectuate'), raport.get('observatii'),
                 raport.get('manopera_ore'), raport.get('km_efectuati'),
-                raport.get('nume_semnatura_client')
+                raport.get('nume_semnatura_client'),
+                raport.get('plecare'),
+                raport.get('destinatie'),
+                raport.get('retur')
             ))
             raport_id = cursor.lastrowid # Aflam ID-ul raportului proaspat creat
         
@@ -219,7 +229,7 @@ def create_raport():
         for piesa in piese_necesare:
              if piesa.get('pn') or piesa.get('descriere'):
                 # Check if part exists in PieseMaster
-                cursor.execute("SELECT id FROM PieseMaster WHERE pn = ?", (piesa.get('pn'),))
+                cursor.execute("SELECT id FROM PieseMaster WHERE pn = ?", (pesa.get('pn'),))
                 row = cursor.fetchone()
                 if not row:
                     # Insert into PieseMaster
@@ -228,8 +238,17 @@ def create_raport():
                 cursor.execute("""
                     INSERT INTO PieseNecesare (raport_id, pn, descriere, buc)
                     VALUES (?, ?, ?, ?)
-                """, (raport_id, piesa.get('pn'), piesa.get('descriere'), piesa.get('buc'))) 
-        # Pas 5: Salveaza istoricul orelor de functionare
+                """, (raport_id, piesa.get('pn'), piesa.get('descriere'), piesa.get('buc')))
+
+        # Pas 5: Insereaza manopera
+        for item in manopera:
+            if item.get('tip') and item.get('ore'):
+                cursor.execute("""
+                    INSERT INTO Manopera (raport_id, tip, ore)
+                    VALUES (?, ?, ?)
+                """, (raport_id, item.get('tip'), item.get('ore')))
+
+        # Pas 6: Salveaza istoricul orelor de functionare
         try:
             if raport.get('utilaj') and raport.get('serie') and client_id:
                 client_id_int = int(client_id)
@@ -276,6 +295,9 @@ def get_report_pdf(raport_id):
     cursor.execute("SELECT * FROM PieseNecesare WHERE raport_id = ?", (raport_id,))
     piese_necesare_data = cursor.fetchall()
 
+    cursor.execute("SELECT * FROM Manopera WHERE raport_id = ?", (raport_id,))
+    manopera_data = cursor.fetchall()
+
     cursor.execute("SELECT * FROM Companie WHERE id = 1")
     companie_data = cursor.fetchone()
 
@@ -285,6 +307,7 @@ def get_report_pdf(raport_id):
     raport = dict(raport_data)
     piese_inlocuite = [dict(p) for p in piese_inlocuite_data]
     piese_necesare = [dict(p) for p in piese_necesare_data]
+    manopera = [dict(m) for m in manopera_data]
     companie = dict(companie_data) if companie_data else {}
 
     # Determine report type
@@ -323,6 +346,7 @@ def get_report_pdf(raport_id):
             raport=raport, 
             piese_inlocuite=piese_inlocuite, 
             piese_necesare=piese_necesare,
+            manopera=manopera,
             companie=companie,
             tip_raport=tip_raport_str,
             logo_data_uri=logo_data_uri
