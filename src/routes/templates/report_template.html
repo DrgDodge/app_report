@@ -186,8 +186,9 @@
             font-weight: bold;
         }
         
+        .parts-table .col-no { width: 5%; text-align: center; }
         .parts-table .col-pn { width: 25%; }
-        .parts-table .col-desc { width: 55%; }
+        .parts-table .col-desc { width: 50%; }
         .parts-table .col-buc { width: 20%; text-align: center; }
 
         /* --- SUMAR (Manopera/Km) --- */
@@ -339,6 +340,7 @@
                         <table class="parts-table">
                             <thead>
                                 <tr>
+                                    <th class="col-no">No.</th>
                                     <th class="col-pn">P/N</th>
                                     <th class="col-desc">Descriere</th>
                                     <th class="col-buc">Buc</th>
@@ -347,6 +349,7 @@
                             <tbody>
                                 {% for piesa in piese_inlocuite %}
                                 <tr>
+                                    <td>{{ loop.index }}</td>
                                     <td>{{ piesa.pn }}</td>
                                     <td>{{ piesa.descriere }}</td>
                                     <td style="text-align: center;">{{ piesa.buc }}</td>
@@ -361,6 +364,7 @@
                         <table class="parts-table">
                             <thead>
                                 <tr>
+                                    <th class="col-no">No.</th>
                                     <th class="col-pn">P/N</th>
                                     <th class="col-desc">Descriere</th>
                                     <th class="col-buc">Buc</th>
@@ -369,6 +373,7 @@
                             <tbody>
                                 {% for piesa in piese_necesare %}
                                 <tr>
+                                    <td>{{ loop.index }}</td>
                                     <td>{{ piesa.pn }}</td>
                                     <td>{{ piesa.descriere }}</td>
                                     <td style="text-align: center;">{{ piesa.buc }}</td>
