@@ -304,16 +304,12 @@
 
                     <div class="form-section">
                         <span class="form-label">Solicitare client:</span>
-                        <div class="form-text-box" style="min-height: 120px;">
-                            {{ raport.solicitare_client }}
-                        </div>
+                        <div class="form-text-box" style="min-height: 120px;">{{ raport.solicitare_client }}</div>
                     </div>
 
                     <div class="form-section">
                         <span class="form-label">Operatii efectuate:</span>
-                        <div class="form-text-box" style="min-height: 200px;">
-                            {{ raport.operatii_efectuate }}
-                        </div>
+                        <div class="form-text-box" style="min-height: 200px;">{{ raport.operatii_efectuate }}</div>
                     </div>
                 </td>
 
@@ -391,9 +387,7 @@
                             <td style="width: 50%; vertical-align: top; padding-right: 10px;">
                                 <div class="form-section">
                                     <span class="form-label">OBS:</span>
-                                    <div class="form-text-box" style="min-height: 150px;">
-                                        {{ raport.observatii | default('', true) }}
-                                    </div>
+                                    <div class="form-text-box" style="min-height: 150px;">{{ raport.observatii | default('', true) }}</div>
                                 </div>
                             </td>
                             <td style="width: 50%; vertical-align: top; padding-left: 10px;">
