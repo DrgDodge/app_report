@@ -1,5 +1,6 @@
 <script lang="ts">
     import { onMount } from 'svelte';
+    import { createEventDispatcher } from 'svelte';
 
     const API_BASE_URL = '/api';
 
@@ -9,7 +10,8 @@
     let messageStatus = $state('idle');
     let fileInput: HTMLInputElement;
 
-    let { showModal } = $bindable();
+    let { showModal } = $props();
+    const dispatch = createEventDispatcher();
 
     let filteredBackups = $derived(backups.filter(b => b.filename.toLowerCase().includes(searchTerm.toLowerCase())));
 
@@ -24,6 +26,11 @@
             fetchBackups();
         }
     });
+
+    function closeModal() {
+        showModal = false;
+        dispatch('closeModal');
+    }
 
     async function fetchBackups() {
         try {
@@ -152,7 +159,7 @@
     <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-4xl">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-2xl font-bold">Backup Manager</h2>
-            <button onclick={() => showModal = false} class="text-gray-500 hover:text-gray-800">&times;</button>
+            <button onclick={closeModal} class="text-gray-500 hover:text-gray-800">&times;</button>
         </div>
 
         <div class="mb-4 flex justify-between">
@@ -194,7 +201,7 @@
         </div>
 
         <div class="mt-4 flex justify-end">
-            <button onclick={() => showModal = false} class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold px-4 py-2 rounded-md">Close</button>
+            <button onclick={closeModal} class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold px-4 py-2 rounded-md">Close</button>
         </div>
     </div>
 </div>

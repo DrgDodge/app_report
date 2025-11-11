@@ -292,4 +292,4 @@
     </div>
 </div>
 
-<BackupManager bind:showModal={showBackupManager} />
+<BackupManager bind:showModal={showBackupManager} on:closeModal={() => showBackupManager = false} />
