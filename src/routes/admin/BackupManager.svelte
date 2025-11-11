@@ -7,6 +7,7 @@
     let searchTerm = $state('');
     let message = $state('');
     let messageStatus = $state('idle');
+    let fileInput: HTMLInputElement;
 
     let { showModal } = $props();
 
@@ -85,6 +86,56 @@
             messageStatus = 'error';
         }
     }
+    async function downloadBackup(filename: string) {
+        try {
+            const response = await fetch(`${API_BASE_URL}/admin/backups/${filename}`);
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            } else {
+                const result = await response.json();
+                throw new Error(result.message);
+            }
+        } catch (error: any) {
+            message = `Error: ${error.message}`;
+            messageStatus = 'error';
+        }
+    }
+
+    async function uploadBackup(event: Event) {
+        const input = event.target as HTMLInputElement;
+        if (!input.files || input.files.length === 0) {
+            return;
+        }
+        const file = input.files[0];
+        const formData = new FormData();
+        formData.append('backup', file);
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/admin/upload-backup`, {
+                method: 'POST',
+                body: formData,
+            });
+            const result = await response.json();
+            if (response.ok) {
+                message = result.message;
+                messageStatus = 'success';
+                fetchBackups();
+            } else {
+                throw new Error(result.message);
+            }
+        } catch (error: any) {
+            message = `Error: ${error.message}`;
+            messageStatus = 'error';
+        }
+    }
 
     function formatBytes(bytes: number, decimals = 2) {
         if (bytes === 0) return '0 Bytes';
@@ -104,8 +155,12 @@
             <button onclick={() => showModal = false} class="text-gray-500 hover:text-gray-800">&times;</button>
         </div>
 
-        <div class="mb-4">
+        <div class="mb-4 flex justify-between">
             <input type="text" bind:value={searchTerm} placeholder="Search backups..." class="w-full p-2 border border-gray-300 rounded-md">
+            <div class="ml-4">
+                <input type="file" bind:this={fileInput} on:change={uploadBackup} accept=".db" class="hidden">
+                <button onclick={() => fileInput.click()} class="bg-blue-600 text-white hover:bg-blue-700 font-semibold px-4 py-2 rounded-md">Upload Backup</button>
+            </div>
         </div>
 
         {#if message}
@@ -129,6 +184,7 @@
                             <td class="py-2 px-4 border-b">{formatBytes(backup.size)}</td>
                             <td class="py-2 px-4 border-b">{new Date(backup.created_at).toLocaleString()}</td>
                             <td class="py-2 px-4 border-b">
+                                <button onclick={() => downloadBackup(backup.filename)} class="bg-green-600 text-white hover:bg-green-700 font-semibold px-3 py-1 rounded-md mr-2">Download</button>
                                 <button onclick={() => restoreBackup(backup.filename)} class="bg-blue-600 text-white hover:bg-blue-700 font-semibold px-3 py-1 rounded-md mr-2">Restore</button>
                                 <button onclick={() => deleteBackup(backup.filename)} class="bg-red-600 text-white hover:bg-red-700 font-semibold px-3 py-1 rounded-md">Delete</button>
                             </td>

@@ -137,6 +137,26 @@ def restore_backup():
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
+@app.route('/api/admin/upload-backup', methods=['POST'])
+def upload_backup():
+    try:
+        if 'backup' not in request.files:
+            return jsonify({"success": False, "message": "No backup file provided"}), 400
+        
+        file = request.files['backup']
+        if file.filename == '':
+            return jsonify({"success": False, "message": "No selected file"}), 400
+
+        if file and file.filename.endswith('.db'):
+            filename = file.filename
+            file.save(os.path.join(BACKUP_DIR, filename))
+            return jsonify({"success": True, "message": "Backup uploaded successfully"}), 200
+        else:
+            return jsonify({"success": False, "message": "Invalid file type. Only .db files are allowed"}), 400
+            
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
 @app.route('/api/admin/backups', methods=['GET'])
 def get_backups():
     try:
@@ -162,6 +182,17 @@ def delete_backup(filename):
         if os.path.exists(path):
             os.remove(path)
             return jsonify({"success": True, "message": "Backup deleted successfully"}), 200
+        else:
+            return jsonify({"success": False, "message": "Backup not found"}), 404
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+@app.route('/api/admin/backups/<path:filename>', methods=['GET'])
+def download_backup(filename):
+    try:
+        path = os.path.join(BACKUP_DIR, filename)
+        if os.path.exists(path):
+            return send_file(path, as_attachment=True)
         else:
             return jsonify({"success": False, "message": "Backup not found"}), 404
     except Exception as e:
