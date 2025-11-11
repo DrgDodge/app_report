@@ -1,7 +1,7 @@
 <script lang="ts">
 	import '../app.css';
 	import { fade } from 'svelte/transition';
-	import { Github } from 'lucide-svelte';
+	import { Github } from '@lucide/svelte';
 </script>
 
 <svelte:head>
