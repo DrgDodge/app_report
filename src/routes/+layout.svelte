@@ -3,6 +3,10 @@
   import '../app.css';
 </script>
 
+<svelte:head>
+  <meta name="theme-color" content="#ffffff">
+</svelte:head>
+
 <div class="min-h-screen flex flex-col bg-gray-100">
 
   <header class="bg-white shadow-md sticky top-0 z-50">
