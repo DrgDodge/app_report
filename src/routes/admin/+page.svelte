@@ -1,6 +1,7 @@
 <script lang="ts">
     import { dev } from '$app/environment';
     import { onMount } from 'svelte';
+    import BackupManager from './BackupManager.svelte';
 
     const API_BASE_URL = '/api';
 
@@ -9,6 +10,15 @@
 
     let backupDbMessage = $state('');
     let backupDbStatus = $state('idle');
+
+    let showBackupManager = $state(false);
+
+    let backupSchedule = $state({
+        enabled: false,
+        interval: 24,
+    });
+    let scheduleMessage = $state('');
+    let scheduleStatus = $state('idle');
 
     let companie = $state({
         nume: '',
@@ -30,6 +40,7 @@
         } catch (error) {
             console.error('Failed to fetch company details:', error);
         }
+        fetchBackupSchedule();
     });
 
     async function initializeDatabase() {
@@ -65,25 +76,55 @@
             const response = await fetch(`${API_BASE_URL}/admin/backup-db`, {
                 method: 'GET',
             });
+            const result = await response.json();
             if (response.ok) {
-                const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `date_backup_${new Date().toISOString().split('T')[0]}.db`;
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-                window.URL.revokeObjectURL(url);
-                backupDbMessage = 'Database backup created successfully.';
+                backupDbMessage = result.message;
                 backupDbStatus = 'success';
             } else {
-                const errorText = await response.text();
-                throw new Error(errorText);
+                throw new Error(result.message);
             }
         } catch (error: any) {
             backupDbMessage = `Error: ${error.message}`;
             backupDbStatus = 'error';
+        }
+    }
+
+    async function fetchBackupSchedule() {
+        try {
+            const response = await fetch(`${API_BASE_URL}/admin/backup-schedule`);
+            if (response.ok) {
+                const data = await response.json();
+                backupSchedule.enabled = data.enabled;
+                if (data.interval) {
+                    backupSchedule.interval = data.interval;
+                }
+            }
+        } catch (error) {
+            console.error('Failed to fetch backup schedule:', error);
+        }
+    }
+
+    async function updateBackupSchedule() {
+        scheduleMessage = 'Updating backup schedule...';
+        scheduleStatus = 'idle';
+        try {
+            const response = await fetch(`${API_BASE_URL}/admin/backup-schedule`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(backupSchedule),
+            });
+            const result = await response.json();
+            if (response.ok) {
+                scheduleMessage = result.message;
+                scheduleStatus = 'success';
+            } else {
+                throw new Error(result.message);
+            }
+        } catch (error: any) {
+            scheduleMessage = `Error: ${error.message}`;
+            scheduleStatus = 'error';
         }
     }
 
@@ -130,17 +171,46 @@
         {/if}
     </div>
 
-    <div class="p-4 border border-green-200 bg-green-50 rounded-md">
+    <div class="mb-8 p-4 border border-green-200 bg-green-50 rounded-md">
         <h2 class="text-xl font-semibold mb-3">Database Backup</h2>
-        <p class="text-gray-700 mb-4">This will download a backup of the current <code>date.db</code> file.</p>
+        <p class="text-gray-700 mb-4">Create a manual backup or manage existing backups.</p>
         <button
             onclick={backupDatabase}
-            class="bg-green-600 text-white hover:bg-green-700 font-semibold px-4 py-2 rounded-md"
+            class="bg-green-600 text-white hover:bg-green-700 font-semibold px-4 py-2 rounded-md mr-4"
         >
-            Create Database Backup
+            Create Manual Backup
+        </button>
+        <button
+            onclick={() => showBackupManager = true}
+            class="bg-blue-600 text-white hover:bg-blue-700 font-semibold px-4 py-2 rounded-md"
+        >
+            Manage Backups
         </button>
         {#if backupDbMessage}
             <p class="mt-3 text-sm {backupDbStatus === 'success' ? 'text-green-600' : 'text-red-600'}">{backupDbMessage}</p>
+        {/if}
+    </div>
+
+    <div class="mb-8 p-4 border border-purple-200 bg-purple-50 rounded-md">
+        <h2 class="text-xl font-semibold mb-3">Automatic Backups</h2>
+        <div class="flex items-center gap-4">
+            <label class="flex items-center gap-2">
+                <input type="checkbox" bind:checked={backupSchedule.enabled} class="form-checkbox h-5 w-5 text-purple-600">
+                <span>Enable Automatic Backups</span>
+            </label>
+            <label class="flex items-center gap-2">
+                <span>Frequency (hours):</span>
+                <input type="number" bind:value={backupSchedule.interval} min="1" class="p-2 border border-gray-300 rounded-md w-24">
+            </label>
+            <button
+                onclick={updateBackupSchedule}
+                class="bg-purple-600 text-white hover:bg-purple-700 font-semibold px-4 py-2 rounded-md"
+            >
+                Save Schedule
+            </button>
+        </div>
+        {#if scheduleMessage}
+            <p class="mt-3 text-sm {scheduleStatus === 'success' ? 'text-green-600' : 'text-red-600'}">{scheduleMessage}</p>
         {/if}
     </div>
 
@@ -178,3 +248,5 @@
         </form>
     </div>
 </div>
+
+<BackupManager bind:showModal={showBackupManager} />
