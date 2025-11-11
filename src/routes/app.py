@@ -169,7 +169,7 @@ def get_backups():
                 backups.append({
                     'filename': filename,
                     'size': size,
-                    'created_at': datetime.datetime.fromtimestamp(creation_time).isoformat()
+                    'created_at': datetime.datetime.utcfromtimestamp(creation_time).isoformat()
                 })
         return jsonify(backups), 200
     except Exception as e:
