@@ -9,7 +9,7 @@
     let message = $state('');
     let messageStatus = $state('idle');
 
-    export let showModal = $state(false);
+    let { showModal } = $props();
 
     onMount(() => {
         if (showModal) {
