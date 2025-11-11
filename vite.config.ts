@@ -6,7 +6,6 @@ import { SvelteKitPWA } from '@vite-pwa/sveltekit';
 export default defineConfig({
 	plugins: [
 		tailwindcss(),
-		sveltekit(),
 		SvelteKitPWA({
 			manifest: {
 				name: 'Raport Lucru',
@@ -29,7 +28,8 @@ export default defineConfig({
 			devOptions: {
 				enabled: true
 			}
-		})
+		}),
+		sveltekit()
 	],
 	server: {
 		proxy: {
