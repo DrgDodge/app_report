@@ -42,30 +42,157 @@ def init_db():
         print(f"Error initializing database: {e}")
         return jsonify({"success": False, "message": str(e)}), 500
 
+# app.py
+import sqlite3
+import json
+from flask import Flask, request, jsonify, Response, send_file, render_template_string
+from flask_cors import CORS
+from weasyprint import HTML
+import os
+import tempfile
+import logging
+import datetime
+from apscheduler.schedulers.background import BackgroundScheduler
+
+logging.basicConfig(level=logging.DEBUG)
+
+app = Flask(__name__)
+# Permite cereri de la Svelte (de pe alt port/domeniu)
+CORS(app, resources={r"/api/*": {"origins": "*"}}) 
+
+DATABASE = os.path.join(os.path.dirname(__file__), 'date.db')
+BACKUP_DIR = os.path.join(os.path.dirname(__file__), '..', '..', 'static', 'backups')
+
+if not os.path.exists(BACKUP_DIR):
+    os.makedirs(BACKUP_DIR)
+
+# --- SCHEDULER ---
+scheduler = BackgroundScheduler()
+scheduler.start()
+backup_job = None
+
+def job_function():
+    """The job function that will be executed by the scheduler."""
+    with app.app_context():
+        backup_db()
+
+# --- ENDPOINTS PENTRU ADMIN ---
+@app.route('/api/admin/init-db', methods=['POST', 'GET'])
+def init_db():
+    try:
+        print("Initializing database...")
+        conn = sqlite3.connect(DATABASE)
+        script_dir = os.path.dirname(__file__)
+        schema_path = os.path.join(script_dir, 'schema.sql')
+        with open(schema_path, 'r') as f:
+            schema_sql = f.read()
+        print("Executing schema script...")
+        conn.executescript(schema_sql)
+        print("Schema script executed successfully.")
+        conn.close()
+        print("Database initialized successfully.")
+        return jsonify({"success": True, "message": "Database initialized successfully."}), 200
+    except Exception as e:
+        print(f"Error initializing database: {e}")
+        return jsonify({"success": False, "message": str(e)}), 500
+
 @app.route('/api/admin/backup-db', methods=['GET'])
 def backup_db():
     try:
-        # Create a temporary backup file
-        import tempfile
-        import os
-        
-        with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
-            temp_db_path = tmp_file.name
+        timestamp = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        backup_filename = f'date_{timestamp}.db'
+        backup_path = os.path.join(BACKUP_DIR, backup_filename)
 
         conn = sqlite3.connect(DATABASE)
-        backup_conn = sqlite3.connect(temp_db_path)
-        with backup_conn: 
+        backup_conn = sqlite3.connect(backup_path)
+        with backup_conn:
             conn.backup(backup_conn)
         backup_conn.close()
         conn.close()
 
-        # Send the file and then delete it
-        response = send_file(temp_db_path, as_attachment=True, download_name='date.db')
-        os.remove(temp_db_path) # Clean up the temporary file
-        return response
+        return jsonify({"success": True, "message": f"Database backed up successfully to /static/backups/{backup_filename}"}), 200
 
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
+
+@app.route('/api/admin/restore-backup', methods=['POST'])
+def restore_backup():
+    try:
+        data = request.get_json()
+        filename = data.get('filename')
+        if not filename:
+            return jsonify({"success": False, "message": "Filename not provided"}), 400
+
+        backup_path = os.path.join(BACKUP_DIR, filename)
+        if not os.path.exists(backup_path):
+            return jsonify({"success": False, "message": "Backup file not found"}), 404
+
+        # Replace the current database with the backup
+        os.remove(DATABASE)
+        import shutil
+        shutil.copy(backup_path, DATABASE)
+        
+        return jsonify({"success": True, "message": "Database restored successfully"}), 200
+
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+@app.route('/api/admin/backups', methods=['GET'])
+def get_backups():
+    try:
+        backups = []
+        for filename in os.listdir(BACKUP_DIR):
+            if filename.endswith('.db'):
+                path = os.path.join(BACKUP_DIR, filename)
+                size = os.path.getsize(path)
+                creation_time = os.path.getctime(path)
+                backups.append({
+                    'filename': filename,
+                    'size': size,
+                    'created_at': datetime.datetime.fromtimestamp(creation_time).isoformat()
+                })
+        return jsonify(backups), 200
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+@app.route('/api/admin/backups/<path:filename>', methods=['DELETE'])
+def delete_backup(filename):
+    try:
+        path = os.path.join(BACKUP_DIR, filename)
+        if os.path.exists(path):
+            os.remove(path)
+            return jsonify({"success": True, "message": "Backup deleted successfully"}), 200
+        else:
+            return jsonify({"success": False, "message": "Backup not found"}), 404
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+@app.route('/api/admin/backup-schedule', methods=['GET', 'POST'])
+def backup_schedule():
+    global backup_job
+    if request.method == 'GET':
+        if backup_job:
+            return jsonify({
+                'enabled': True,
+                'interval': backup_job.trigger.interval.total_seconds() / 3600 # hours
+            }), 200
+        else:
+            return jsonify({'enabled': False}), 200
+            
+    if request.method == 'POST':
+        data = request.get_json()
+        enabled = data.get('enabled')
+        interval = data.get('interval') # in hours
+
+        if backup_job:
+            backup_job.remove()
+            backup_job = None
+
+        if enabled and interval:
+            backup_job = scheduler.add_job(job_function, 'interval', hours=int(interval))
+            return jsonify({"success": True, "message": f"Backup scheduled every {interval} hours"}), 200
+        
+        return jsonify({"success": True, "message": "Backup schedule disabled"}), 200
 
 
 # --- ENDPOINTS PENTRU AUTACOMPLETE ---
