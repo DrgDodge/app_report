@@ -1,0 +1,21 @@
+{
+  "name": "Raport Lucru",
+  "short_name": "Raport",
+  "description": "A work report generator application.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": [
+    {
+      "src": "/logo.webp",
+      "sizes": "512x512",
+      "type": "image/webp"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

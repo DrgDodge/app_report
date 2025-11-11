@@ -5,6 +5,7 @@
 
 <svelte:head>
   <meta name="theme-color" content="#ffffff">
+  <link rel="manifest" href="/manifest.json">
 </svelte:head>
 
 <div class="min-h-screen flex flex-col bg-gray-100">
