@@ -9,7 +9,7 @@
     let messageStatus = $state('idle');
     let fileInput: HTMLInputElement;
 
-    let { showModal } = $props();
+    let { showModal } = $bindable();
 
     let filteredBackups = $derived(backups.filter(b => b.filename.toLowerCase().includes(searchTerm.toLowerCase())));
 
