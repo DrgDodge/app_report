@@ -16,9 +16,11 @@
     let backupSchedule = $state({
         enabled: false,
         interval: 24,
+        next_run_time: null,
     });
     let scheduleMessage = $state('');
     let scheduleStatus = $state('idle');
+    let countdown = $state('');
 
     let companie = $state({
         nume: '',
@@ -30,6 +32,7 @@
 
     let updateCompanieMessage = $state('');
     let updateCompanieStatus = $state('idle');
+    let countdownInterval: any;
 
     onMount(async () => {
         try {
@@ -41,6 +44,12 @@
             console.error('Failed to fetch company details:', error);
         }
         fetchBackupSchedule();
+
+        return () => {
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+            }
+        };
     });
 
     async function initializeDatabase() {
@@ -89,6 +98,22 @@
         }
     }
 
+    function formatCountdown(finishDate: Date) {
+        const now = new Date();
+        const diff = finishDate.getTime() - now.getTime();
+
+        if (diff <= 0) {
+            return '00:00:00:00';
+        }
+
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+        return `${days.toString().padStart(2, '0')}:${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+
     async function fetchBackupSchedule() {
         try {
             const response = await fetch(`${API_BASE_URL}/admin/backup-schedule`);
@@ -97,6 +122,20 @@
                 backupSchedule.enabled = data.enabled;
                 if (data.interval) {
                     backupSchedule.interval = data.interval;
+                }
+                if (data.next_run_time) {
+                    backupSchedule.next_run_time = new Date(data.next_run_time);
+                    if (countdownInterval) {
+                        clearInterval(countdownInterval);
+                    }
+                    countdownInterval = setInterval(() => {
+                        countdown = formatCountdown(backupSchedule.next_run_time);
+                    }, 1000);
+                } else {
+                    if (countdownInterval) {
+                        clearInterval(countdownInterval);
+                    }
+                    countdown = '';
                 }
             }
         } catch (error) {
@@ -119,6 +158,7 @@
             if (response.ok) {
                 scheduleMessage = result.message;
                 scheduleStatus = 'success';
+                fetchBackupSchedule();
             } else {
                 throw new Error(result.message);
             }
@@ -211,6 +251,9 @@
         </div>
         {#if scheduleMessage}
             <p class="mt-3 text-sm {scheduleStatus === 'success' ? 'text-green-600' : 'text-red-600'}">{scheduleMessage}</p>
+        {/if}
+        {#if countdown}
+            <p class="mt-3 text-sm text-gray-600">Next backup in: {countdown} (DD:HH:MM:SS)</p>
         {/if}
     </div>
 

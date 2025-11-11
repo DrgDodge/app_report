@@ -181,7 +181,7 @@
                         <tr>
                             <td class="py-2 px-4 border-b">{backup.filename}</td>
                             <td class="py-2 px-4 border-b">{formatBytes(backup.size)}</td>
-                            <td class="py-2 px-4 border-b">{new Date(backup.created_at).toLocaleString()}</td>
+                            <td class="py-2 px-4 border-b">{new Date(backup.created_at).toLocaleString('ro-RO', { timeZone: 'Europe/Bucharest' })}</td>
                             <td class="py-2 px-4 border-b">
                                 <button onclick={() => downloadBackup(backup.filename)} class="bg-green-600 text-white hover:bg-green-700 font-semibold px-3 py-1 rounded-md mr-2">Download</button>
                                 <button onclick={() => restoreBackup(backup.filename)} class="bg-blue-600 text-white hover:bg-blue-700 font-semibold px-3 py-1 rounded-md mr-2">Restore</button>

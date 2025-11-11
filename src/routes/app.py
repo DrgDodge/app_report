@@ -205,7 +205,8 @@ def backup_schedule():
         if backup_job:
             return jsonify({
                 'enabled': True,
-                'interval': backup_job.trigger.interval.total_seconds() / 3600 # hours
+                'interval': backup_job.trigger.interval.total_seconds() / 3600, # hours
+                'next_run_time': backup_job.next_run_time.isoformat()
             }), 200
         else:
             return jsonify({'enabled': False}), 200
