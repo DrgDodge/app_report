@@ -4,12 +4,13 @@
     const API_BASE_URL = '/api';
 
     let backups = $state<any[]>([]);
-    let filteredBackups = $state<any[]>([]);
     let searchTerm = $state('');
     let message = $state('');
     let messageStatus = $state('idle');
 
     let { showModal } = $props();
+
+    let filteredBackups = $derived(backups.filter(b => b.filename.toLowerCase().includes(searchTerm.toLowerCase())));
 
     onMount(() => {
         if (showModal) {
@@ -17,13 +18,11 @@
         }
     });
 
-    $: if (showModal) {
-        fetchBackups();
-    }
-
-    $: if (backups.length > 0) {
-        filteredBackups = backups.filter(b => b.filename.toLowerCase().includes(searchTerm.toLowerCase()));
-    }
+    $effect(() => {
+        if (showModal) {
+            fetchBackups();
+        }
+    });
 
     async function fetchBackups() {
         try {
