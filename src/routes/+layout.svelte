@@ -5,7 +5,7 @@
 
 <svelte:head>
   <meta name="theme-color" content="#ffffff">
-  <link rel="manifest" href="/manifest.json">
+  <link rel="manifest" href="data:application/manifest+json;base64,ewogICJuYW1lIjogIlJhcG9ydCBMdWNydSIsCiAgInNob3J0X25hbWUiOiAiUmFwb3J0IiwKICAiZGVzY3JpcHRpb24iOiAiQSB3b3JrIHJlcG9ydCBnZW5lcmF0b3IgYXBwbGljYXRpb24uIiwKICAic3RhcnRfdXJsIjogIi8iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNmZmZmZmYiLAogICJ0aGVtZV9jb2xvciI6ICIjZmZmZmZmIiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiL2xvZ28ud2VicCIsCiAgICAgICJzaXplcyI6ICI1MTJ4NTEyIiwKICAgICAgInR5cGUiOiAiaW1hZ2Uvd2VicCIKICAgIH0sCiAgICB7CiAgICAgICJzcmMiOiAiL2Zhdmljb24uc3ZnIiwKICAgICAgInNpemVzIjogImFueSIsCiAgICAgICJ0eXBlIjogImltYWdlL3N2Zyt4bWwiCiAgICB9CiAgXQp9Cg==">
 </svelte:head>
 
 <div class="min-h-screen flex flex-col bg-gray-100">

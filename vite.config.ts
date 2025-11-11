@@ -8,6 +8,11 @@ export default defineConfig({
 		sveltekit()
 	],
 	server: {
+		hmr: {
+			protocol: 'wss',
+			host: 'reportgen.lseb.top',
+			port: 443
+		},
 		proxy: {
 			'/api': {
 				target: 'http://backend:5000',
