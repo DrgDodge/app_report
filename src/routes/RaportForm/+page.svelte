@@ -704,8 +704,8 @@
 					                            <tr>
 					                                <th class="border border-gray-300 p-1 text-left text-sm w-[5%]">No.</th>
 					                                <th class="border border-gray-300 p-1 text-left text-sm w-[30%]">P/N</th>
-					                                <th class="border border-gray-300 p-1 text-left text-sm w-[50%]">Descriere</th>
-					                                <th class="border border-gray-300 p-1 text-left text-sm w-[10%]">Buc</th>
+					                                <th class="border border-gray-300 p-1 text-left text-sm w-[45%]">Descriere</th>
+					                                <th class="border border-gray-300 p-1 text-left text-sm w-[15%]">Buc</th>
 					<th class="border border-gray-300 p-1 text-left text-sm w-[10%]"></th>
 					                                <th class="border border-gray-300 p-1 text-left text-sm w-[10%]"></th>
 					                            </tr>
@@ -806,8 +806,8 @@
                             <tr>
                                 <th class="border border-gray-300 p-1 text-left text-sm w-[5%]">No.</th>
                                 <th class="border border-gray-300 p-1 text-left text-sm w-[30%]">P/N</th>
-                                <th class="border border-gray-300 p-1 text-left text-sm w-[50%]">Descriere</th>
-                                <th class="border border-gray-300 p-1 text-left text-sm w-[10%]">Buc</th>
+                                <th class="border border-gray-300 p-1 text-left text-sm w-[45%]">Descriere</th>
+                                <th class="border border-gray-300 p-1 text-left text-sm w-[15%]">Buc</th>
                                 <th class="border border-gray-300 p-1 text-left text-sm w-[10%]"></th>
                             </tr>
                         </thead>
