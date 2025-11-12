@@ -773,7 +773,7 @@
 																																					                                                                                                                                                                                    </div>
 																																					                                                                                                                                                                                {/each}																																					                                                                                                                            </ul>
 																																					                                                                                                                        {/if}																						</td>									<td class="border border-gray-300 p-1">
-										<input type="number" min="1" bind:value={piesa.buc} class={inputClassTable} />
+										<input type="number" step="0.1" bind:value={piesa.buc} class={inputClassTable} />
 									</td>
 									<td class="border border-gray-300 p-1">
 										<button
@@ -881,7 +881,7 @@
                                         {/if}
                                     </td>
                                     <td class="border border-gray-300 p-1">
-                                        <input type="number" min="1" bind:value={piesa.buc} class={inputClassTable} />
+                                        <input type="number" step="0.1" bind:value={piesa.buc} class={inputClassTable} />
                                     </td>
                                     <td class="border border-gray-300 p-1">
                                         <button
