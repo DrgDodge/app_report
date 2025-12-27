@@ -947,5 +947,109 @@ def delete_raport(raport_id):
     finally:
         conn.close()
 
+import xml.etree.ElementTree as ET
+
+@app.route('/api/invoice', methods=['POST'])
+def create_invoice():
+    if 'file' not in request.files:
+        return jsonify({"success": False, "message": "No file uploaded"}), 400
+
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({"success": False, "message": "No file selected"}), 400
+
+    if file and file.filename.endswith('.xml'):
+        try:
+            # Save the uploaded file temporarily
+            temp_dir = tempfile.gettempdir()
+            temp_path = os.path.join(temp_dir, file.filename)
+            file.save(temp_path)
+
+            # Parse the XML file
+            tree = ET.parse(temp_path)
+            root = tree.getroot()
+
+            ns = {
+                'cbc': 'urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2',
+                'cac': 'urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2'
+            }
+
+            # Extract data from XML
+            invoice_data = {
+                'invoice_number': root.find('cbc:ID', ns).text,
+                'invoice_date': root.find('cbc:IssueDate', ns).text,
+                'client_name': root.find('.//cac:AccountingCustomerParty/cac:Party/cac:PartyName/cbc:Name', ns).text,
+                'client_address': root.find('.//cac:AccountingCustomerParty/cac:Party/cac:PostalAddress/cbc:StreetName', ns).text,
+                'client_cui': root.find('.//cac:AccountingCustomerParty/cac:Party/cac:PartyTaxScheme/cbc:CompanyID', ns).text,
+                'items': [],
+                'total': 0
+            }
+
+            total = 0
+            for invoice_line in root.findall('.//cac:InvoiceLine', ns):
+                quantity = float(invoice_line.find('cbc:InvoicedQuantity', ns).text)
+                price = float(invoice_line.find('.//cac:Price/cbc:PriceAmount', ns).text)
+                item_total = quantity * price
+                invoice_data['items'].append({
+                    'name': invoice_line.find('.//cac:Item/cbc:Name', ns).text,
+                    'quantity': quantity,
+                    'price': price,
+                    'total': item_total
+                })
+                total += item_total
+            
+            invoice_data['total'] = total
+
+            # For now, we'll just store the parsed data in a temporary file
+            # Later, we can store it in the database
+            invoice_id = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+            invoice_data_path = os.path.join(temp_dir, f'invoice_{invoice_id}.json')
+            with open(invoice_data_path, 'w') as f:
+                json.dump(invoice_data, f)
+
+            # Clean up the temporary XML file
+            os.remove(temp_path)
+
+            return jsonify({"success": True, "invoice_id": invoice_id, "message": "Invoice created successfully"}), 201
+
+        except Exception as e:
+            return jsonify({"success": False, "message": str(e)}), 500
+    else:
+        return jsonify({"success": False, "message": "Invalid file type. Only .xml files are allowed"}), 400
+
+
+@app.route('/api/invoice/<invoice_id>/pdf')
+def get_invoice_pdf(invoice_id):
+    try:
+        # Load the invoice data from the temporary file
+        temp_dir = tempfile.gettempdir()
+        invoice_data_path = os.path.join(temp_dir, f'invoice_{invoice_id}.json')
+        with open(invoice_data_path, 'r') as f:
+            invoice_data = json.load(f)
+
+        # Load the invoice template
+        template_path = os.path.join(os.path.dirname(__file__), 'templates', 'invoice_template.html')
+        with open(template_path, 'r', encoding='utf-8') as f:
+            template_str = f.read()
+
+        # Render the HTML with the invoice data
+        html_rendered = render_template_string(template_str, invoice=invoice_data)
+
+        # Generate the PDF
+        pdf_bytes = HTML(string=html_rendered).write_pdf()
+
+        # Clean up the temporary JSON file
+        os.remove(invoice_data_path)
+
+        # Return the PDF
+        return Response(
+            pdf_bytes,
+            mimetype='application/pdf',
+            headers={'Content-Disposition': f'inline; filename=Invoice_{invoice_id}.pdf'}
+        )
+
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

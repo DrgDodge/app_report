@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <title>Bon de Consum</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 1cm;
+        }
+        body {
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            font-size: 10px;
+            color: #333;
+        }
+        .container {
+            width: 100%;
+            margin: 0 auto;
+        }
+        .title-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+        }
+        .title-table td {
+            border: 1px solid #000;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 5px;
+        }
+        .upper-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+        }
+        .upper-table td {
+            border: 1px solid #000;
+            padding: 5px;
+        }
+        .details-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+        }
+        .details-table td {
+            border: 1px solid #000;
+            padding: 5px;
+            text-align: center;
+        }
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+        }
+        .items-table th, .items-table td {
+            border: 1px solid #000;
+            padding: 5px;
+            text-align: left;
+        }
+        .items-table th {
+            background-color: #f0f0f0;
+            text-align: center;
+        }
+        .footer-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .footer-table td {
+            border: 1px solid #000;
+            padding: 5px;
+            text-align: center;
+            height: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <table class="title-table">
+            <tr>
+                <td>BON DE CONSUM</td>
+            </tr>
+        </table>
+
+        <table class="upper-table">
+            <tr>
+                <td style="width: 50%;">Unitatea: Seb Linservice S.R.L.</td>
+                <td style="width: 50%;">Produs, lucrare (comanda) - </td>
+            </tr>
+        </table>
+
+        <table class="details-table">
+            <tr>
+                <td colspan="1">Numar Document</td>
+                <td colspan="3">Data</td>
+                <td colspan="1">Cod Predator</td>
+                <td colspan="1">Cod Primitor</td>
+                <td colspan="1">Nr. Document</td>
+            </tr>
+            <tr>
+                <td>{{ invoice.invoice_number }}</td>
+                <td>{{ invoice.invoice_date.split('-')[2] }}</td>
+                <td>{{ invoice.invoice_date.split('-')[1] }}</td>
+                <td>{{ invoice.invoice_date.split('-')[0] }}</td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+        </table>
+
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th>Nr. crt</th>
+                    <th>Denumirea valorii materiale</th>
+                    <th>Cantitate</th>
+                    <th>Pret (lei)</th>
+                    <th>Cod</th>
+                    <th>Valoarea (lei)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in invoice.items %}
+                <tr>
+                    <td style="text-align: center;">{{ loop.index }}</td>
+                    <td>{{ item.name }}</td>
+                    <td style="text-align: center;">{{ item.quantity }}</td>
+                    <td style="text-align: right;">{{ "%.2f"|format(item.price) }}</td>
+                    <td></td>
+                    <td style="text-align: right;">{{ "%.2f"|format(item.total) }}</td>
+                </tr>
+                {% endfor %}
+                <tr>
+                    <td colspan="4" style="text-align: right; font-weight: bold;">Valoarea totala</td>
+                    <td colspan="2" style="text-align: right; font-weight: bold;">{{ "%.2f"|format(invoice.total) }} lei</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <table class="footer-table">
+            <tr>
+                <td style="width: 25%;">Sef Compartiment</td>
+                <td style="width: 25%;">Gestionar</td>
+                <td style="width: 25%;">Primitor</td>
+                <td style="width: 25%;">Data si Semnatura</td>
+            </tr>
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>{{ invoice.invoice_date }}</td>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>
