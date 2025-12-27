@@ -1084,14 +1084,14 @@
 		                        		                		                const data = await res.json();
 		                        		                		                raport = data.raport;
 		                        		                
-		                        		                						data.pieseInlocuite.forEach(p => {
+		                        		                						data.pieseInlocuite.forEach((p: Piesa) => {
 		                        		                							if (p.pn && p.pn.startsWith('NO-')) {
 		                        		                								p.pn = '';
 		                        		                							}
 		                        		                						});
 		                        		                		                pieseInlocuite = data.pieseInlocuite;
 		                        		                
-		                        		                						data.pieseNecesare.forEach(p => {
+		                        		                						data.pieseNecesare.forEach((p: Piesa) => {
 		                        		                							if (p.pn && p.pn.startsWith('NO-')) {
 		                        		                								p.pn = '';
 		                        		                							}

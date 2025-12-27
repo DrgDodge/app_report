@@ -10,7 +10,7 @@
     let messageStatus = $state('idle');
     let fileInput = $state<HTMLInputElement>();
 
-    let { showModal } = $props();
+    let { showModal = $bindable() } = $props();
     const dispatch = createEventDispatcher();
 
     let filteredBackups = $derived(backups.filter(b => b.filename.toLowerCase().includes(searchTerm.toLowerCase())));
@@ -165,7 +165,7 @@
         <div class="mb-4 flex justify-between">
             <input type="text" bind:value={searchTerm} placeholder="Search backups..." class="w-full p-2 border border-gray-300 rounded-md">
             <div class="ml-4">
-                                 <input type="file" bind:this={fileInput} onchange={uploadBackup} accept=".db" class="hidden">                <button onclick={() => fileInput.click()} class="bg-blue-600 text-white hover:bg-blue-700 font-semibold px-4 py-2 rounded-md">Upload Backup</button>
+                                 <input type="file" bind:this={fileInput} onchange={uploadBackup} accept=".db" class="hidden">                <button onclick={() => fileInput?.click()} class="bg-blue-600 text-white hover:bg-blue-700 font-semibold px-4 py-2 rounded-md">Upload Backup</button>
             </div>
         </div>
 

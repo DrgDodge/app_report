@@ -16,7 +16,7 @@
     let backupSchedule = $state({
         enabled: false,
         interval: 24,
-        next_run_time: null,
+        next_run_time: null as Date | null,
     });
     let scheduleMessage = $state('');
     let scheduleStatus = $state('idle');
@@ -34,15 +34,22 @@
     let updateCompanieStatus = $state('idle');
     let countdownInterval: any;
 
-    onMount(async () => {
-        try {
-            const response = await fetch(`${API_BASE_URL}/companie`);
-            if (response.ok) {
-                companie = await response.json();
-            }
-        } catch (error) {
-            console.error('Failed to fetch company details:', error);
-        }
+    onMount(() => {
+        fetch(`${API_BASE_URL}/companie`)
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                }
+            })
+            .then(data => {
+                if (data) {
+                    companie = data;
+                }
+            })
+            .catch(error => {
+                console.error('Failed to fetch company details:', error);
+            });
+
         fetchBackupSchedule();
 
         return () => {
@@ -129,7 +136,9 @@
                         clearInterval(countdownInterval);
                     }
                     countdownInterval = setInterval(() => {
+                        if (backupSchedule.next_run_time) {
                         countdown = formatCountdown(backupSchedule.next_run_time);
+                    }
                     }, 1000);
                 } else {
                     if (countdownInterval) {
