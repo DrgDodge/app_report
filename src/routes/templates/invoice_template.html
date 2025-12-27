@@ -126,14 +126,14 @@
                     <td style="text-align: center;">{{ loop.index }}</td>
                     <td>{{ item.name }}</td>
                     <td style="text-align: center;">{{ item.quantity }}</td>
-                    <td style="text-align: right;">{{ '%.2f' % item.price }}</td>
+                    <td style="text-align: right;">{{ item.price|round(2) }}</td>
                     <td></td>
-                    <td style="text-align: right;">{{ '%.2f' % item.total }}</td>
+                    <td style="text-align: right;">{{ item.total|round(2) }}</td>
                 </tr>
                 {% endfor %}
                 <tr>
                     <td colspan="4" style="text-align: right; font-weight: bold;">Valoarea totala</td>
-                    <td colspan="2" style="text-align: right; font-weight: bold;">{{ '%.2f' % invoice.total }} lei</td>
+                    <td colspan="2" style="text-align: right; font-weight: bold;">{{ invoice.total|round(2) }} lei</td>
                 </tr>
             </tbody>
         </table>
