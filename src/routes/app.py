@@ -1000,6 +1000,8 @@ def create_invoice():
             
             invoice_data['total'] = total
 
+            app.logger.debug(f"Saving invoice data: {invoice_data}")
+
             # For now, we'll just store the parsed data in a temporary file
             # Later, we can store it in the database
             invoice_id = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
@@ -1013,6 +1015,7 @@ def create_invoice():
             return jsonify({"success": True, "invoice_id": invoice_id, "message": "Invoice created successfully"}), 201
 
         except Exception as e:
+            app.logger.error(f"Error creating invoice: {e}", exc_info=True)
             return jsonify({"success": False, "message": str(e)}), 500
     else:
         return jsonify({"success": False, "message": "Invalid file type. Only .xml files are allowed"}), 400
@@ -1026,6 +1029,9 @@ def get_invoice_pdf(invoice_id):
         invoice_data_path = os.path.join(temp_dir, f'invoice_{invoice_id}.json')
         with open(invoice_data_path, 'r') as f:
             invoice_data = json.load(f)
+
+        app.logger.debug(f"Loaded invoice data: {invoice_data}")
+        app.logger.debug(f"Type of invoice.items: {type(invoice_data.get('items'))}")
 
         # Load the invoice template
         template_path = os.path.join(os.path.dirname(__file__), 'templates', 'invoice_template.html')
@@ -1049,6 +1055,7 @@ def get_invoice_pdf(invoice_id):
         )
 
     except Exception as e:
+        app.logger.error(f"Error generating PDF: {e}", exc_info=True)
         return jsonify({"success": False, "message": str(e)}), 500
 
 if __name__ == '__main__':
