@@ -99,10 +99,10 @@
                 <td colspan="1">Nr. Document</td>
             </tr>
             <tr>
-                <td>{{ invoice.invoice_number }}</td>
-                <td>{{ invoice.invoice_date.split('-')[2] }}</td>
-                <td>{{ invoice.invoice_date.split('-')[1] }}</td>
-                <td>{{ invoice.invoice_date.split('-')[0] }}</td>
+                <td>{{ invoice_data.invoice_number }}</td>
+                <td>{{ invoice_data.invoice_date.split('-')[2] }}</td>
+                <td>{{ invoice_data.invoice_date.split('-')[1] }}</td>
+                <td>{{ invoice_data.invoice_date.split('-')[0] }}</td>
                 <td></td>
                 <td></td>
                 <td></td>
@@ -121,7 +121,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% for item in invoice.items %}
+                {% for item in invoice_data.items %}
                 <tr>
                     <td style="text-align: center;">{{ loop.index }}</td>
                     <td>{{ item.name }}</td>
@@ -133,7 +133,7 @@
                 {% endfor %}
                 <tr>
                     <td colspan="4" style="text-align: right; font-weight: bold;">Valoarea totala</td>
-                    <td colspan="2" style="text-align: right; font-weight: bold;">{{ invoice.total|round(2) }} lei</td>
+                    <td colspan="2" style="text-align: right; font-weight: bold;">{{ invoice_data.total|round(2) }} lei</td>
                 </tr>
             </tbody>
         </table>
@@ -149,7 +149,7 @@
                 <td></td>
                 <td></td>
                 <td></td>
-                <td>{{ invoice.invoice_date }}</td>
+                <td>{{ invoice_data.invoice_date }}</td>
             </tr>
         </table>
     </div>

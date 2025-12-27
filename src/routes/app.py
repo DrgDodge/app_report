@@ -1039,7 +1039,7 @@ def get_invoice_pdf(invoice_id):
             template_str = f.read()
 
         # Render the HTML with the invoice data
-        html_rendered = render_template_string(template_str, invoice=invoice_data)
+        html_rendered = render_template_string(template_str, invoice_data=invoice_data)
 
         # Generate the PDF
         pdf_bytes = HTML(string=html_rendered).write_pdf()
