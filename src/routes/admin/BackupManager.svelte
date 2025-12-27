@@ -8,7 +8,7 @@
     let searchTerm = $state('');
     let message = $state('');
     let messageStatus = $state('idle');
-    let fileInput: HTMLInputElement;
+    let fileInput = $state<HTMLInputElement>();
 
     let { showModal } = $props();
     const dispatch = createEventDispatcher();

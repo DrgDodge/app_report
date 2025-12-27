@@ -18,6 +18,7 @@
           <a href="/RaportForm" class="text-lg font-medium text-muted-foreground hover:text-foreground">Raport Form</a>
           <a href="/database" class="text-lg font-medium text-muted-foreground hover:text-foreground">Database</a>
           <a href="/admin" class="text-lg font-medium text-muted-foreground hover:text-foreground">Admin</a>
+          <a href="/invoice" class="text-lg font-medium text-muted-foreground hover:text-foreground">Invoice</a>
         </div>
       </div>
     </nav>
