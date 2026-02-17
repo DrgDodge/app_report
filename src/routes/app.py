@@ -7,52 +7,9 @@ from weasyprint import HTML
 import os
 import tempfile
 import logging
-
-logging.basicConfig(level=logging.DEBUG)
-
-app = Flask(__name__)
-# Permite cereri de la Svelte (de pe alt port/domeniu)
-CORS(app, resources={r"/api/*": {"origins": "*"}}) 
-
-DATABASE = os.path.join(os.path.dirname(__file__), 'date.db')
-
-def get_db_conn():
-    """ Functie helper pentru conexiunea la DB """
-    conn = sqlite3.connect(DATABASE)
-    conn.row_factory = sqlite3.Row
-    return conn
-
-# --- ENDPOINTS PENTRU ADMIN ---
-@app.route('/api/admin/init-db', methods=['POST', 'GET'])
-def init_db():
-    try:
-        print("Initializing database...")
-        conn = sqlite3.connect(DATABASE)
-        script_dir = os.path.dirname(__file__)
-        schema_path = os.path.join(script_dir, 'schema.sql')
-        with open(schema_path, 'r') as f:
-            schema_sql = f.read()
-        print("Executing schema script...")
-        conn.executescript(schema_sql)
-        print("Schema script executed successfully.")
-        conn.close()
-        print("Database initialized successfully.")
-        return jsonify({"success": True, "message": "Database initialized successfully."}), 200
-    except Exception as e:
-        print(f"Error initializing database: {e}")
-        return jsonify({"success": False, "message": str(e)}), 500
-
-# app.py
-import sqlite3
-import json
-from flask import Flask, request, jsonify, Response, send_file, render_template_string
-from flask_cors import CORS
-from weasyprint import HTML
-import os
-import tempfile
-import logging
 import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
+import xml.etree.ElementTree as ET
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -66,6 +23,48 @@ BACKUP_DIR = os.path.join(os.path.dirname(__file__), '..', '..', 'static', 'back
 if not os.path.exists(BACKUP_DIR):
     os.makedirs(BACKUP_DIR)
 
+# --- DATABASE INIT ON STARTUP ---
+def init_db_on_startup():
+    try:
+        logging.info("Checking database schema on startup...")
+        conn = sqlite3.connect(DATABASE)
+        
+        # Manually create tables that might be missing if schema.sql isn't used or to ensure specific updates
+        cursor = conn.cursor()
+        
+        # Ensure Lucrare table exists
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS Lucrare (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL UNIQUE
+            )
+        """)
+
+        # Ensure Settings table exists
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS Settings (
+                key TEXT PRIMARY KEY,
+                value TEXT
+            )
+        """)
+        
+        # Also run the full schema script if available to catch other tables
+        script_dir = os.path.dirname(__file__)
+        schema_path = os.path.join(script_dir, 'schema.sql')
+        if os.path.exists(schema_path):
+             with open(schema_path, 'r') as f:
+                schema_sql = f.read()
+             conn.executescript(schema_sql)
+
+        conn.commit()
+        conn.close()
+        logging.info("Database schema checked/updated successfully.")
+    except Exception as e:
+        logging.error(f"Error initializing database on startup: {e}")
+
+# Run init on startup
+init_db_on_startup()
+
 # --- SCHEDULER ---
 scheduler = BackgroundScheduler()
 scheduler.start()
@@ -75,6 +74,12 @@ def job_function():
     """The job function that will be executed by the scheduler."""
     with app.app_context():
         backup_db()
+
+def get_db_conn():
+    """ Functie helper pentru conexiunea la DB """
+    conn = sqlite3.connect(DATABASE)
+    conn.row_factory = sqlite3.Row
+    return conn
 
 # --- ENDPOINTS PENTRU ADMIN ---
 @app.route('/api/admin/init-db', methods=['POST', 'GET'])
@@ -870,8 +875,6 @@ def add_lucrare():
         finally:
             conn.close()
 
-    return jsonify({'message': 'No Lucrare name provided'}), 400
-
 @app.route('/api/lucrare/<int:id>', methods=['DELETE'])
 def delete_lucrare(id):
     conn = get_db_conn()
@@ -992,6 +995,39 @@ def delete_raport(raport_id):
         conn.close()
 
 import xml.etree.ElementTree as ET
+
+@app.route('/api/invoice/last-number', methods=['GET'])
+def get_last_invoice_number():
+    conn = get_db_conn()
+    cursor = conn.cursor()
+    cursor.execute("SELECT value FROM Settings WHERE key = 'last_invoice_number'")
+    row = cursor.fetchone()
+    conn.close()
+    
+    if row:
+        return jsonify({'number': int(row['value'])}), 200
+    else:
+        return jsonify({'number': None}), 200
+
+@app.route('/api/invoice/save-number', methods=['POST'])
+def save_invoice_number():
+    data = request.json
+    number = data.get('number')
+    
+    if number is None:
+        return jsonify({'success': False, 'message': 'No number provided'}), 400
+        
+    conn = get_db_conn()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("INSERT OR REPLACE INTO Settings (key, value) VALUES ('last_invoice_number', ?)", (str(number),))
+        conn.commit()
+        return jsonify({'success': True}), 200
+    except Exception as e:
+        conn.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
+    finally:
+        conn.close()
 
 @app.route('/api/invoice/parse', methods=['POST'])
 def parse_invoice():

@@ -85,6 +85,22 @@
 			if (response.ok) {
 				statusMessage = '';
 				invoiceData = result.data;
+                
+                // Fetch next invoice number
+                if (invoiceData) {
+                    try {
+                        const numRes = await fetch('/api/invoice/last-number');
+                        if (numRes.ok) {
+                            const numData = await numRes.json();
+                            if (numData.number !== null) {
+                                invoiceData.invoice_number = (numData.number + 1).toString();
+                            }
+                            // If null, we keep the one from XML (or user input)
+                        }
+                    } catch (e) {
+                        console.error("Failed to fetch last invoice number", e);
+                    }
+                }
 			} else {
 				throw new Error(result.message);
 			}
@@ -100,6 +116,13 @@
 		statusType = 'success';
 
 		try {
+            // Save the current invoice number
+            await fetch('/api/invoice/save-number', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ number: parseInt(invoiceData.invoice_number) })
+            });
+
 			const response = await fetch('/api/invoice/pdf', {
 				method: 'POST',
 				headers: {
@@ -113,6 +136,13 @@
 				const url = window.URL.createObjectURL(blob);
 				window.open(url, '_blank');
 				statusMessage = 'PDF Generated successfully!';
+                
+                // Update for next number (optional but nice UX)
+                 const currentNum = parseInt(invoiceData.invoice_number);
+                 if (!isNaN(currentNum)) {
+                     invoiceData.invoice_number = (currentNum + 1).toString();
+                 }
+
 			} else {
                 const errorData = await response.json();
 				throw new Error(errorData.message || 'Failed to generate PDF');
