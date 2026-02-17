@@ -993,8 +993,8 @@ def delete_raport(raport_id):
 
 import xml.etree.ElementTree as ET
 
-@app.route('/api/invoice', methods=['POST'])
-def create_invoice():
+@app.route('/api/invoice/parse', methods=['POST'])
+def parse_invoice():
     if 'file' not in request.files:
         return jsonify({"success": False, "message": "No file uploaded"}), 400
 
@@ -1018,24 +1018,48 @@ def create_invoice():
                 'cac': 'urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2'
             }
 
+            # Helper function to safely get text
+            def get_text(element, xpath):
+                found = element.find(xpath, ns)
+                return found.text if found is not None else ''
+
             # Extract data from XML
+            invoice_number = get_text(root, 'cbc:ID')
+            invoice_date = get_text(root, 'cbc:IssueDate')
+            
+            # Try to get client name from PartyName, fallback to PartyLegalEntity
+            client_name = get_text(root, './/cac:AccountingCustomerParty/cac:Party/cac:PartyName/cbc:Name')
+            if not client_name:
+                client_name = get_text(root, './/cac:AccountingCustomerParty/cac:Party/cac:PartyLegalEntity/cbc:RegistrationName')
+
+            client_address = get_text(root, './/cac:AccountingCustomerParty/cac:Party/cac:PostalAddress/cbc:StreetName')
+            client_cui = get_text(root, './/cac:AccountingCustomerParty/cac:Party/cac:PartyTaxScheme/cbc:CompanyID')
+
             invoice_data = {
-                'invoice_number': root.find('cbc:ID', ns).text,
-                'invoice_date': root.find('cbc:IssueDate', ns).text,
-                'client_name': root.find('.//cac:AccountingCustomerParty/cac:Party/cac:PartyName/cbc:Name', ns).text,
-                'client_address': root.find('.//cac:AccountingCustomerParty/cac:Party/cac:PostalAddress/cbc:StreetName', ns).text,
-                'client_cui': root.find('.//cac:AccountingCustomerParty/cac:Party/cac:PartyTaxScheme/cbc:CompanyID', ns).text,
+                'invoice_number': invoice_number,
+                'invoice_date': invoice_date,
+                'client_name': client_name,
+                'client_address': client_address,
+                'client_cui': client_cui,
                 'items': [],
-                'total': 0
+                'total': 0,
+                'lucrare': '' # Default empty
             }
 
             total = 0
             for invoice_line in root.findall('.//cac:InvoiceLine', ns):
-                quantity = float(invoice_line.find('cbc:InvoicedQuantity', ns).text)
-                price = float(invoice_line.find('.//cac:Price/cbc:PriceAmount', ns).text)
+                quantity_text = get_text(invoice_line, 'cbc:InvoicedQuantity')
+                price_text = get_text(invoice_line, './/cac:Price/cbc:PriceAmount')
+                
+                quantity = float(quantity_text) if quantity_text else 0.0
+                price = float(price_text) if price_text else 0.0
+                
                 item_total = quantity * price
+                
+                item_name = get_text(invoice_line, './/cac:Item/cbc:Name')
+
                 invoice_data['items'].append({
-                    'name': invoice_line.find('.//cac:Item/cbc:Name', ns).text,
+                    'name': item_name,
                     'quantity': quantity,
                     'price': price,
                     'total': item_total
@@ -1044,38 +1068,35 @@ def create_invoice():
             
             invoice_data['total'] = total
 
-            app.logger.debug(f"Saving invoice data: {invoice_data}")
-
-            # For now, we'll just store the parsed data in a temporary file
-            # Later, we can store it in the database
-            invoice_id = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
-            invoice_data_path = os.path.join(temp_dir, f'invoice_{invoice_id}.json')
-            with open(invoice_data_path, 'w') as f:
-                json.dump(invoice_data, f)
-
             # Clean up the temporary XML file
             os.remove(temp_path)
 
-            return jsonify({"success": True, "invoice_id": invoice_id, "message": "Invoice created successfully"}), 201
+            return jsonify({"success": True, "data": invoice_data}), 200
 
         except Exception as e:
-            app.logger.error(f"Error creating invoice: {e}", exc_info=True)
+            app.logger.error(f"Error parsing invoice: {e}", exc_info=True)
             return jsonify({"success": False, "message": str(e)}), 500
     else:
         return jsonify({"success": False, "message": "Invalid file type. Only .xml files are allowed"}), 400
 
 
-@app.route('/api/invoice/<invoice_id>/pdf')
-def get_invoice_pdf(invoice_id):
+@app.route('/api/invoice/pdf', methods=['POST'])
+def generate_invoice_pdf():
     try:
-        # Load the invoice data from the temporary file
-        temp_dir = tempfile.gettempdir()
-        invoice_data_path = os.path.join(temp_dir, f'invoice_{invoice_id}.json')
-        with open(invoice_data_path, 'r') as f:
-            invoice_data = json.load(f)
+        invoice_data = request.json
 
-        app.logger.debug(f"Loaded invoice data: {invoice_data}")
-        app.logger.debug(f"Type of invoice.items: {type(invoice_data.get('items'))}")
+        app.logger.debug(f"Generating PDF for data: {invoice_data}")
+
+        # Recalculate total just in case
+        total = 0
+        for item in invoice_data.get('items', []):
+            # Ensure numbers are floats
+            qty = float(item.get('quantity', 0))
+            price = float(item.get('price', 0))
+            item_total = qty * price
+            item['total'] = item_total
+            total += item_total
+        invoice_data['total'] = total
 
         # Load the invoice template
         template_path = os.path.join(os.path.dirname(__file__), 'templates', 'invoice_template.html')
@@ -1088,14 +1109,11 @@ def get_invoice_pdf(invoice_id):
         # Generate the PDF
         pdf_bytes = HTML(string=html_rendered).write_pdf()
 
-        # Clean up the temporary JSON file
-        os.remove(invoice_data_path)
-
         # Return the PDF
         return Response(
             pdf_bytes,
             mimetype='application/pdf',
-            headers={'Content-Disposition': f'inline; filename=Invoice_{invoice_id}.pdf'}
+            headers={'Content-Disposition': f'inline; filename=Invoice_{invoice_data.get("invoice_number", "draft")}.pdf'}
         )
 
     except Exception as e:
