@@ -75,6 +75,9 @@
             text-align: center;
             height: 30px;
         }
+        .bold-value {
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -88,7 +91,7 @@
         <table class="upper-table">
             <tr>
                 <td style="width: 50%;">Unitatea: Seb Linservice S.R.L.</td>
-                <td style="width: 50%;"><strong>Produs, lucrare (comanda)</strong> - {{ invoice.lucrare }}</td>
+                <td style="width: 50%;"><strong>Produs, lucrare (comanda)</strong> - <span class="bold-value">{{ invoice.lucrare }}</span></td>
             </tr>
         </table>
 
@@ -100,7 +103,7 @@
                 <td colspan="1">Cod Primitor</td>
                 <td colspan="1">Nr. Document</td>
             </tr>
-            <tr>
+            <tr class="bold-value">
                 <td>{{ invoice.invoice_number }}</td>
                 <td>{{ invoice.invoice_date.split('-')[2] }}</td>
                 <td>{{ invoice.invoice_date.split('-')[1] }}</td>
@@ -124,7 +127,7 @@
             </thead>
             <tbody>
                 {% for item in invoice['items'] %}
-                <tr>
+                <tr class="bold-value">
                     <td style="text-align: center;">{{ loop.index }}</td>
                     <td>{{ item.name }}</td>
                     <td style="text-align: center;">{{ item.quantity }}</td>
@@ -151,7 +154,7 @@
                 <td></td>
                 <td></td>
                 <td></td>
-                <td>{{ invoice.invoice_date }}</td>
+                <td class="bold-value">{{ invoice.invoice_date }}</td>
             </tr>
         </table>
     </div>
