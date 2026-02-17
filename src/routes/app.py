@@ -47,6 +47,20 @@ def init_db_on_startup():
                 value TEXT
             )
         """)
+
+        # Ensure Invoices table exists
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS Invoices (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                invoice_number TEXT,
+                invoice_date TEXT,
+                supplier_name TEXT, 
+                total REAL,
+                lucrare TEXT,
+                data_json TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
         
         # Also run the full schema script if available to catch other tables
         script_dir = os.path.dirname(__file__)
@@ -1029,6 +1043,92 @@ def save_invoice_number():
     finally:
         conn.close()
 
+@app.route('/api/invoices', methods=['GET'])
+def get_invoices():
+    conn = get_db_conn()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, invoice_number, invoice_date, supplier_name, total, lucrare FROM Invoices ORDER BY id DESC")
+    invoices = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return jsonify(invoices), 200
+
+@app.route('/api/invoice/save', methods=['POST'])
+def save_invoice():
+    data = request.json
+    
+    # Extract key fields for the table
+    invoice_number = data.get('invoice_number')
+    invoice_date = data.get('invoice_date')
+    supplier_name = data.get('supplier_name')
+    total = data.get('total')
+    lucrare = data.get('lucrare')
+    
+    # Store the full JSON for editing later
+    data_json = json.dumps(data)
+    
+    # Check if it has an ID (update)
+    invoice_id = data.get('id')
+    
+    conn = get_db_conn()
+    cursor = conn.cursor()
+    
+    try:
+        if invoice_id:
+            cursor.execute("""
+                UPDATE Invoices 
+                SET invoice_number = ?, invoice_date = ?, supplier_name = ?, total = ?, lucrare = ?, data_json = ?
+                WHERE id = ?
+            """, (invoice_number, invoice_date, supplier_name, total, lucrare, data_json, invoice_id))
+            message = "Invoice updated successfully"
+        else:
+            cursor.execute("""
+                INSERT INTO Invoices (invoice_number, invoice_date, supplier_name, total, lucrare, data_json)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """, (invoice_number, invoice_date, supplier_name, total, lucrare, data_json))
+            invoice_id = cursor.lastrowid
+            # Also update the JSON with the new ID
+            data['id'] = invoice_id
+            cursor.execute("UPDATE Invoices SET data_json = ? WHERE id = ?", (json.dumps(data), invoice_id))
+            message = "Invoice saved successfully"
+            
+        conn.commit()
+        return jsonify({'success': True, 'id': invoice_id, 'message': message}), 200
+    except Exception as e:
+        conn.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
+    finally:
+        conn.close()
+
+@app.route('/api/invoice/<int:id>', methods=['GET'])
+def get_invoice_by_id(id):
+    conn = get_db_conn()
+    cursor = conn.cursor()
+    cursor.execute("SELECT data_json FROM Invoices WHERE id = ?", (id,))
+    row = cursor.fetchone()
+    conn.close()
+    
+    if row:
+        data = json.loads(row['data_json'])
+        # Ensure ID is consistent
+        data['id'] = id 
+        return jsonify(data), 200
+    else:
+        return jsonify({'success': False, 'message': 'Invoice not found'}), 404
+
+@app.route('/api/invoice/<int:id>', methods=['DELETE'])
+def delete_invoice(id):
+    conn = get_db_conn()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("DELETE FROM Invoices WHERE id = ?", (id,))
+        conn.commit()
+        return jsonify({'success': True, 'message': 'Invoice deleted successfully'}), 200
+    except Exception as e:
+        conn.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
+    finally:
+        conn.close()
+
 @app.route('/api/invoice/parse', methods=['POST'])
 def parse_invoice():
     if 'file' not in request.files:
@@ -1067,6 +1167,11 @@ def parse_invoice():
             client_name = get_text(root, './/cac:AccountingCustomerParty/cac:Party/cac:PartyName/cbc:Name')
             if not client_name:
                 client_name = get_text(root, './/cac:AccountingCustomerParty/cac:Party/cac:PartyLegalEntity/cbc:RegistrationName')
+            
+            # Get Supplier Name (Seller-firm)
+            supplier_name = get_text(root, './/cac:AccountingSupplierParty/cac:Party/cac:PartyName/cbc:Name')
+            if not supplier_name:
+                supplier_name = get_text(root, './/cac:AccountingSupplierParty/cac:Party/cac:PartyLegalEntity/cbc:RegistrationName')
 
             client_address = get_text(root, './/cac:AccountingCustomerParty/cac:Party/cac:PostalAddress/cbc:StreetName')
             client_cui = get_text(root, './/cac:AccountingCustomerParty/cac:Party/cac:PartyTaxScheme/cbc:CompanyID')
@@ -1075,6 +1180,7 @@ def parse_invoice():
                 'invoice_number': invoice_number,
                 'invoice_date': invoice_date,
                 'client_name': client_name,
+                'supplier_name': supplier_name,
                 'client_address': client_address,
                 'client_cui': client_cui,
                 'items': [],

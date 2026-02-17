@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
     import { fly } from 'svelte/transition';
+    import InvoiceHistory from './InvoiceHistory.svelte';
 
 	// --- Interfaces ---
 	interface InvoiceItem {
@@ -11,9 +12,11 @@
 	}
 
 	interface InvoiceData {
+        id?: number; // Added optional ID
 		invoice_number: string;
 		invoice_date: string;
 		client_name: string;
+        supplier_name: string; // Added supplier_name
 		client_address: string;
 		client_cui: string;
 		items: InvoiceItem[];
@@ -36,6 +39,7 @@
 	let selectedLucrareId = $state<number | null>(null);
     let newLucrareName = $state('');
     let showAddLucrare = $state(false);
+    let showHistory = $state(false);
 
 	// --- Lifecycle ---
 	onMount(async () => {
@@ -86,8 +90,8 @@
 				statusMessage = '';
 				invoiceData = result.data;
                 
-                // Fetch next invoice number
-                if (invoiceData) {
+                // Fetch next invoice number only if new (no ID)
+                if (invoiceData && !invoiceData.id) {
                     try {
                         const numRes = await fetch('/api/invoice/last-number');
                         if (numRes.ok) {
@@ -95,7 +99,6 @@
                             if (numData.number !== null) {
                                 invoiceData.invoice_number = (numData.number + 1).toString();
                             }
-                            // If null, we keep the one from XML (or user input)
                         }
                     } catch (e) {
                         console.error("Failed to fetch last invoice number", e);
@@ -112,17 +115,33 @@
 
 	async function handleGeneratePDF() {
 		if (!invoiceData) return;
-		statusMessage = 'Generating PDF...';
+		statusMessage = 'Saving and Generating PDF...';
 		statusType = 'success';
 
 		try {
-            // Save the current invoice number
+            // 1. Save Invoice to DB
+            const saveRes = await fetch('/api/invoice/save', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(invoiceData)
+            });
+
+            if (!saveRes.ok) {
+                const err = await saveRes.json();
+                throw new Error(err.message || 'Failed to save invoice');
+            }
+
+            const saveData = await saveRes.json();
+            if (invoiceData) invoiceData.id = saveData.id; // Update ID
+
+            // 2. Save the last invoice number settings
             await fetch('/api/invoice/save-number', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ number: parseInt(invoiceData.invoice_number) })
+                body: JSON.stringify({ number: parseInt(invoiceData!.invoice_number) })
             });
 
+            // 3. Generate PDF
 			const response = await fetch('/api/invoice/pdf', {
 				method: 'POST',
 				headers: {
@@ -135,14 +154,10 @@
 				const blob = await response.blob();
 				const url = window.URL.createObjectURL(blob);
 				window.open(url, '_blank');
-				statusMessage = 'PDF Generated successfully!';
+				statusMessage = 'Saved & PDF Generated successfully!';
                 
-                // Update for next number (optional but nice UX)
-                 const currentNum = parseInt(invoiceData.invoice_number);
-                 if (!isNaN(currentNum)) {
-                     invoiceData.invoice_number = (currentNum + 1).toString();
-                 }
-
+                // Auto-increment number for next time if it was a new invoice
+                // We don't reset invoiceData here, user might want to edit more.
 			} else {
                 const errorData = await response.json();
 				throw new Error(errorData.message || 'Failed to generate PDF');
@@ -163,13 +178,10 @@
 		invoiceData.items = invoiceData.items.filter((_, i) => i !== index);
 	}
     
-    // Recalculate item total when qty or price changes
     function updateItemTotal(index: number) {
         if (!invoiceData) return;
         const item = invoiceData.items[index];
         item.total = item.quantity * item.price;
-        // Trigger reactivity if needed (Svelte 5 runstate handles deep reactivity usually, but assigning to array index might need help if not using proxies correctly, though $state should handle it)
-        // With $state, direct mutation is fine.
     }
 
     $effect(() => {
@@ -180,7 +192,6 @@
 
 	async function addNewLucrare() {
         if(!newLucrareName.trim()) return;
-        
         try {
             const res = await fetch('/api/lucrare', {
                 method: 'POST',
@@ -191,8 +202,6 @@
                 await fetchLucrari();
                 newLucrareName = '';
                 showAddLucrare = false;
-                // Auto select the new one?
-                // For now just refresh list
             }
         } catch(e) {
             console.error(e);
@@ -201,8 +210,6 @@
 
     function handleLucrareChange() {
         if (!invoiceData) return;
-        // When dropdown changes, update invoiceData.lucrare
-        // We find the lucrare name by id
         const lucrare = lucrari.find(l => l.id === selectedLucrareId);
         if (lucrare) {
             invoiceData.lucrare = lucrare.name;
@@ -211,17 +218,69 @@
         }
     }
 
+    // --- History Handlers ---
+    async function loadInvoiceForEdit(id: number) {
+        try {
+            const res = await fetch(`/api/invoice/${id}`);
+            if (res.ok) {
+                invoiceData = await res.json();
+                showHistory = false;
+                
+                // Try to match selectedLucrareId based on loaded name
+                if (invoiceData && invoiceData.lucrare) {
+                    const matched = lucrari.find(l => l.name === invoiceData!.lucrare);
+                    if (matched) selectedLucrareId = matched.id;
+                }
+            } else {
+                alert('Failed to load invoice details');
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Error loading invoice');
+        }
+    }
+
+    async function quickGeneratePDF(id: number) {
+         // Load data first, then generate
+         try {
+            const res = await fetch(`/api/invoice/${id}`);
+            if (res.ok) {
+                const data = await res.json();
+                const pdfRes = await fetch('/api/invoice/pdf', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+                if (pdfRes.ok) {
+                    const blob = await pdfRes.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    window.open(url, '_blank');
+                } else {
+                    alert('Failed to generate PDF');
+                }
+            }
+         } catch(e) {
+             console.error(e);
+             alert('Error generating PDF');
+         }
+    }
+
     const inputClass = "w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none";
     const inputClassTable = "w-full p-1 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-transparent outline-none";
 
 </script>
 
-<div class="max-w-4xl mx-auto my-5 p-5 border border-gray-300 bg-gray-50 font-sans rounded-lg">
-	<h1 class="text-3xl font-bold mb-5 text-center">Bon Consum Generator</h1>
+<div class="max-w-4xl mx-auto my-5 p-5 border border-gray-300 bg-gray-50 font-sans rounded-lg relative">
+	<header class="relative text-center mb-5">
+        <h1 class="text-3xl font-bold">Bon Consum Generator</h1>
+        <div class="absolute top-0 right-0">
+             <button type="button" onclick={() => showHistory = true} class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md font-semibold hover:bg-gray-300">Istoric</button>
+        </div>
+    </header>
 
 	{#if !invoiceData}
 		<!-- Upload Section -->
-		<div class="max-w-xl mx-auto">
+		<div class="max-w-xl mx-auto mt-10">
 			<form onsubmit={(e) => { e.preventDefault(); handleUpload(); }}>
 				<div class="mb-4">
 					<label for="xml-file" class="block text-sm font-medium text-gray-700 mb-2"
@@ -256,6 +315,10 @@
 					<label for="inv_date" class="font-bold text-sm mb-1 text-gray-700">Date</label>
 					<input type="text" id="inv_date" bind:value={invoiceData.invoice_date} class={inputClass} />
 				</div>
+                 <div class="flex flex-col md:col-span-2">
+                    <label for="supplier" class="font-bold text-sm mb-1 text-gray-700">Furnizor (Client)</label>
+                    <input type="text" id="supplier" bind:value={invoiceData.supplier_name} class={inputClass} />
+                </div>
                 <div class="flex flex-col md:col-span-2">
                      <label for="lucrare" class="font-bold text-sm mb-1 text-gray-700">Lucrare (Work)</label>
                      <div class="flex gap-2">
@@ -270,7 +333,7 @@
                                 <option value={l.id}>{l.name}</option>
                             {/each}
                         </select>
-                        <button type="button" onclick={() => showAddLucrare = !showAddLucrare} class="bg-green-500 text-white px-3 py-2 rounded-md">+</button>
+                        <button type="button" onclick={() => showAddLucrare = !showAddLucrare} class="bg-green-500 text-white px-3 py-2 rounded-md font-bold">+</button>
                      </div>
                      {#if showAddLucrare}
                         <div class="flex gap-2 mt-2" transition:fly={{ y: -5 }}>
@@ -302,7 +365,7 @@
                                     <input type="text" bind:value={item.name} class={inputClassTable} />
                                 </td>
                                 <td class="border border-gray-300 p-2">
-                                    <input type="number" step="0.01" bind:value={item.quantity} oninput={() => updateItemTotal(i)} class={inputClassTable} />
+                                    <input type="number" step="0.001" bind:value={item.quantity} oninput={() => updateItemTotal(i)} class={inputClassTable} />
                                 </td>
                                 <td class="border border-gray-300 p-2">
                                     <input type="number" step="0.01" bind:value={item.price} oninput={() => updateItemTotal(i)} class={inputClassTable} />
@@ -329,7 +392,7 @@
 
             <div class="flex gap-4 mt-5">
                 <button type="button" onclick={() => invoiceData = null} class="bg-gray-500 text-white px-6 py-3 rounded-md hover:bg-gray-600">Cancel</button>
-                <button type="button" onclick={handleGeneratePDF} class="flex-grow bg-blue-600 text-white px-6 py-3 rounded-md font-bold hover:bg-blue-700 text-lg">Generate PDF</button>
+                <button type="button" onclick={handleGeneratePDF} class="flex-grow bg-blue-600 text-white px-6 py-3 rounded-md font-bold hover:bg-blue-700 text-lg">Save & Generate PDF</button>
             </div>
 
 		</div>
@@ -346,4 +409,12 @@
 			{statusMessage}
 		</div>
 	{/if}
+
+    {#if showHistory}
+        <InvoiceHistory 
+            on:close={() => showHistory = false}
+            on:edit={(e) => loadInvoiceForEdit(e.detail)}
+            on:generate={(e) => quickGeneratePDF(e.detail)}
+        />
+    {/if}
 </div>
