@@ -843,6 +843,50 @@ def get_raport(raport_id):
         'manopera': manopera
     })
 
+@app.route('/api/lucrare', methods=['GET'])
+def get_lucrare():
+    conn = get_db_conn()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM Lucrare ORDER BY name")
+    lucrari = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return jsonify(lucrari)
+
+@app.route('/api/lucrare', methods=['POST'])
+def add_lucrare():
+    data = request.json
+    name = data.get('name')
+
+    if name:
+        conn = get_db_conn()
+        cursor = conn.cursor()
+        try:
+            cursor.execute("INSERT OR IGNORE INTO Lucrare (name) VALUES (?)", (name,))
+            conn.commit()
+            return jsonify({'message': 'Lucrare added successfully'}), 201
+        except Exception as e:
+            conn.rollback()
+            return jsonify({"success": False, "message": str(e)}), 500
+        finally:
+            conn.close()
+
+    return jsonify({'message': 'No Lucrare name provided'}), 400
+
+@app.route('/api/lucrare/<int:id>', methods=['DELETE'])
+def delete_lucrare(id):
+    conn = get_db_conn()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("DELETE FROM Lucrare WHERE id = ?", (id,))
+        conn.commit()
+        return jsonify({'message': 'Lucrare deleted successfully'}), 200
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"success": False, "message": str(e)}), 500
+    finally:
+        conn.close()
+
+
 @app.route('/api/clients', methods=['GET'])
 def get_clients():
     conn = get_db_conn()

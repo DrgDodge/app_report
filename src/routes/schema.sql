@@ -119,3 +119,8 @@ CREATE TABLE IF NOT EXISTS Companie (
 );
 
 INSERT OR IGNORE INTO Companie (id, nume, adresa, email, telefon, logo) VALUES (1, 'NUME COMPANIE', 'Adresa Companie, Oras, Cod Postal', 'contact@companie.ro', '07xx xxx xxx', 'logo.png');
+
+CREATE TABLE IF NOT EXISTS Lucrare (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL UNIQUE
+);
